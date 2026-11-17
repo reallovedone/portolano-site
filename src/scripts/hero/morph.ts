@@ -85,6 +85,9 @@ export function createMorph(hero: HTMLElement, box: HTMLElement, svg: SVGElement
       if (p > 0) hooks.hold(from * (1 - p));
       else if (lastP > 0) hooks.hold(null);
       setUnit(p === 0 ? 1 : scale);
+      // Discrete stacking switch: above the window as soon as the hand-off starts (clean desktop path only).
+      if (p > 0) hero.setAttribute("data-handoff", "");
+      else hero.removeAttribute("data-handoff");
       lastP = p;
     }
     if (opacity !== lastOpacity) {
@@ -112,6 +115,7 @@ export function createMorph(hero: HTMLElement, box: HTMLElement, svg: SVGElement
     box.style.opacity = "";
     box.style.visibility = "";
     svg.style.removeProperty("--hero-u");
+    hero.removeAttribute("data-handoff");
   });
   setUnit(1);
   measure();

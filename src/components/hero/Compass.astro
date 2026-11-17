@@ -164,7 +164,12 @@ const bearings = BEARINGS.map(([index, port]) => {
   }
 
   /* ---- Animated rose: layout --------------------------------------------- */
+  /* Behind the app window (a later sibling with the same z-index) at rest. Only while the scroll hand-off
+     runs (the script sets data-handoff on the hero) is the rose painted above it. */
   .animated {
+    z-index: 0;
+  }
+  :global([data-hero][data-handoff]) .animated {
     z-index: 1;
   }
   /* `.rose` is the box the scroll hand-off moves and scales; `.spin` is the box that turns. */
