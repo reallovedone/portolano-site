@@ -57,6 +57,7 @@ const { data } = Astro.props;
       <Button href={data.checksumsUrl} variant="text">{download.checksums}</Button>
     </div>
     <p class="note">{download.note}</p>
+    <p class="note">{download.updateNote}</p>
     <div class="build">
       <h3 class="t-h3">{download.buildTitle}</h3>
       <pre class="code"><code>{download.buildCode}</code></pre>

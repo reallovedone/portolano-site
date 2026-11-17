@@ -105,7 +105,7 @@ export const features = {
       kind: "rdp",
       name: "RDP",
       port: "3389",
-      text: "Windows desktops with Network Level Authentication and the remote cursor.",
+      text: "Windows desktops with Network Level Authentication, the remote cursor and an optional shared clipboard for text and files.",
     },
     {
       kind: "vnc",
@@ -143,9 +143,9 @@ export const features = {
       text: "Import from OpenSSH config, .rdp files, MobaXterm, mRemoteNG and CSV. Export to JSON and .rdp.",
     },
     {
-      icon: "sun-moon",
-      title: "Light and dark.",
-      text: "Both themes, following the system.",
+      icon: "refresh-cw",
+      title: "Updates you approve.",
+      text: "Portolano checks for new versions, shows what changed and asks before installing. Every update is verified with the project's signing key.",
     },
   ] as Array<{ icon: string; title: string; text: string }>,
 };
@@ -220,6 +220,7 @@ export const download = {
   allReleases: "All releases →",
   checksums: "SHA256SUMS.txt →",
   note: "The builds are not signed, so macOS and Windows warn you the first time. On macOS, right-click the app and choose Open. On Windows, press More info, then Run anyway.",
+  updateNote: "Version 0.1.0 has no updater: install the new version by hand once. After that, updates are offered inside the app.",
   buildTitle: "Prefer to build it yourself?",
   buildCode: `git clone https://github.com/reallovedone/portolano.git
 cd portolano && pnpm install && pnpm ui:install && pnpm build`,
