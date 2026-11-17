@@ -1,0 +1,171 @@
+---
+import Button from "../Button.astro";
+import Eyebrow from "../Eyebrow.astro";
+import Icon from "../Icon.astro";
+import ThemedScreen from "../ThemedScreen.astro";
+import WindowFrame from "../WindowFrame.astro";
+import Compass from "./Compass.astro";
+import "./hero.css";
+import { hero, nav, REPO_URL, service, showcase } from "../../content/copy";
+import { formatCount, visibleStat, type GithubData } from "../../lib/github";
+
+interface Props {
+  data: GithubData;
+}
+const { data } = Astro.props;
+const stars = visibleStat(data.stars);
+---
+
+<section class="hero" aria-labelledby="hero-title" data-hero>
+  <Compass placement="center" animated />
+  <div class="stage">
+    <div class="container copy">
+      <!-- "Rotta" mark: same geometry as the nav logo, split so the stroke can be traced and the berth dot lands last. -->
+      <svg class="mark" viewBox="0 0 512 512" fill="none" aria-hidden="true" focusable="false">
+        <g transform="translate(-20 -2)">
+          <path class="mark-line" d="M172 424V196A104 104 0 1 1 276 300" pathLength="1" stroke="currentColor" stroke-width="52" stroke-linecap="round" stroke-linejoin="round" />
+          <circle class="mark-dot" cx="276" cy="196" r="34" fill="currentColor" />
+        </g>
+      </svg>
+      <div class="rise" style="--k:0"><Eyebrow>{hero.eyebrow}</Eyebrow></div>
+      <h1 id="hero-title" class="t-display rise" style="--k:1">{hero.title}</h1>
+      <p class="t-lead subtitle rise" style="--k:2">{hero.subtitle}</p>
+      <div class="actions rise" style="--k:3">
+        <Button href={REPO_URL} variant="primary" size="lg" label={service.heroGithubLabel(stars)}>
+          <Icon name="github" />
+          <span>{hero.primary}</span>
+          {stars !== null && <span class="stars" aria-hidden="true">★ {formatCount(stars)}</span>}
+        </Button>
+        <!-- No JavaScript: a plain link to the download section. data-os-download lets the detected-OS script (S3) upgrade it. -->
+        <Button href="#download" variant="secondary" size="lg" data-os-download>{nav.links[2].label}</Button>
+      </div>
+      <p class="meta t-small rise" style="--k:4">{hero.meta(data.version)}</p>
+    </div>
+  </div>
+  <div class="window-wrap">
+    <div class="container">
+      <div class="window" data-hero-window>
+        <WindowFrame>
+          <ThemedScreen id="welcome" alt={showcase.screens[0].alt} sizes="(min-width: 1184px) 960px, calc(100vw - 32px)" />
+        </WindowFrame>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import "../../scripts/hero/index";
+</script>
+
+<style>
+  .hero {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface-content);
+  }
+  /* First screen: copy on top, the top of the app window peeking in at the bottom edge of the viewport. */
+  .stage {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    min-block-size: calc(var(--web-hero-min-h) - var(--web-hero-peek));
+    /* The mark adds its own height, so the title stays where it was without it. */
+    padding-block-start: max(
+      calc(var(--web-hero-top) - var(--hero-mark-size) - var(--space-6)),
+      calc(var(--web-nav-h) + var(--space-8))
+    );
+    padding-block-end: var(--web-space-16);
+  }
+  .copy {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-6);
+    text-align: center;
+  }
+  .mark {
+    inline-size: var(--hero-mark-size);
+    block-size: var(--hero-mark-size);
+    color: var(--text-primary);
+  }
+  .subtitle {
+    max-inline-size: var(--web-measure);
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-3);
+    margin-block-start: var(--space-2);
+  }
+  .stars {
+    font-family: var(--font-mono);
+    font-weight: var(--font-weight-regular);
+  }
+  .meta {
+    font-family: var(--font-mono);
+    color: var(--text-tertiary);
+  }
+  /* The whole window is in the page: it rises into view as the page scrolls, and ends with air below it. */
+  .window-wrap {
+    position: relative;
+    z-index: 0;
+    padding-block-end: var(--hero-window-gap);
+  }
+  .window {
+    inline-size: var(--web-hero-window-w);
+    margin-inline: auto;
+  }
+
+  /* ---- Load choreography: copy and window (CSS only, JS-gated pre-animation state) ---- */
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(var(--hero-rise));
+      }
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+    @keyframes trace {
+      from {
+        stroke-dasharray: 1 2;
+        stroke-dashoffset: 1;
+      }
+      to {
+        stroke-dasharray: 1 2;
+        stroke-dashoffset: 0;
+      }
+    }
+    @keyframes pop {
+      from {
+        opacity: 0;
+        transform: scale(0.4);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    :global(html.js) .rise {
+      animation: rise var(--web-duration-reveal) var(--ease-out) calc(var(--hero-copy-start) + var(--k) * var(--hero-copy-step)) backwards;
+    }
+    :global(html.js) .window {
+      animation: rise var(--web-duration-reveal) var(--ease-out) var(--hero-window-start) backwards;
+    }
+    :global(html.js) .mark-line {
+      animation: trace var(--hero-mark-dur) var(--ease-out) var(--hero-mark-start) backwards;
+    }
+    :global(html.js) .mark-dot {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: pop var(--hero-mark-dot-dur) var(--ease-out) var(--hero-mark-dot-start) backwards;
+    }
+  }
+</style>

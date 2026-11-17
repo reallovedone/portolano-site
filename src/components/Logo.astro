@@ -1,0 +1,22 @@
+---
+// "Rotta" mark, same geometry as src/assets/brand/logo.svg, inheriting the text colour.
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<svg class:list={["logo", className]} viewBox="0 0 512 512" fill="none" aria-hidden="true" focusable="false">
+  <g transform="translate(-20 -2)">
+    <path d="M172 424V196A104 104 0 1 1 276 300" stroke="currentColor" stroke-width="52" stroke-linecap="round" stroke-linejoin="round" />
+    <circle cx="276" cy="196" r="34" fill="currentColor" />
+  </g>
+</svg>
+
+<style>
+  .logo {
+    flex: none;
+    inline-size: var(--web-logo-size);
+    block-size: var(--web-logo-size);
+  }
+</style>

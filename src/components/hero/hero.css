@@ -1,0 +1,53 @@
+/* ==========================================================================
+   Hero animation tokens (package S2). Durations, delays and sizes of the first-screen choreography
+   live here, never inside components. JS reads the ones it needs with getComputedStyle.
+   Load choreography timeline (ms from page load), see PIANO_SITO.md 4.1:
+     0-300      centre dot, then the 16 circle points clockwise, 15 ms apart
+     200-1100   eight principal winds traced from the centre
+     500-1700   network lines traced in waves, grouped by start point
+     900-1600   two rings drawn along the circumference
+     1400-2000  port labels, one at a time
+     1200-2000  "Rotta" mark traced like a route, mooring dot last
+     300-1000+  copy rises, 80 ms apart (earlier than the plan table so the title reads within 1 s)
+   ========================================================================== */
+
+:root {
+  /* ---- Load choreography ------------------------------------------------ */
+  --hero-core-dur: 150ms;
+  --hero-node-step: 15ms;
+  --hero-node-dur: 75ms;
+  --hero-wind-start: 200ms;
+  --hero-wind-step: 40ms;
+  --hero-wind-dur: 620ms;
+  --hero-line-start: 500ms;
+  --hero-line-step: 40ms;
+  --hero-line-dur: 640ms;
+  --hero-ring-start: 900ms;
+  --hero-ring-dur: 700ms;
+  --hero-label-start: 1400ms;
+  --hero-label-step: 100ms;
+  --hero-label-dur: 200ms;
+  --hero-mark-start: 1200ms;
+  --hero-mark-dur: 650ms;
+  --hero-mark-dot-start: 1850ms;
+  --hero-mark-dot-dur: 150ms;
+  --hero-copy-start: 300ms;
+  --hero-copy-step: 80ms;
+  --hero-window-start: 700ms;
+  --hero-rise: 16px;
+  --hero-mark-size: 56px;
+
+  /* ---- Continuous state --------------------------------------------------- */
+  --hero-spin-period: 240s;
+  --hero-route-min: 2500ms;
+  --hero-route-max: 4000ms;
+  --hero-route-travel: 500ms;
+  --hero-route-lit: 900ms;
+  --hero-route-max-active: 2;
+  --hero-dot-size: 3px;
+
+  /* ---- Layout and scroll hand-off ---------------------------------------- */
+  --hero-rose-y: 50svh;
+  --hero-window-gap: var(--web-space-16);
+  --hero-morph-fade: 0.15;
+}

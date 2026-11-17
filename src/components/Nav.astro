@@ -1,0 +1,114 @@
+---
+import Button from "./Button.astro";
+import Icon from "./Icon.astro";
+import Logo from "./Logo.astro";
+import ThemeToggle from "./ThemeToggle.astro";
+import { nav, REPO_URL, service } from "../content/copy";
+import { formatCount, visibleStat } from "../lib/github";
+
+interface Props {
+  stars: number | null;
+  /** "" on the home page, "/" on other pages so the section links point back home. */
+  home?: string;
+}
+const { stars, home = "" } = Astro.props;
+const shownStars = visibleStat(stars);
+---
+
+<header class="nav">
+  <div class="container bar">
+    <a class="brand" href={home === "" ? "#" : home} aria-label={nav.brand}>
+      <Logo />
+      <span class="brand-name">{nav.brand}</span>
+    </a>
+    <nav class="links" aria-label={service.navLabels.header}>
+      {nav.links.map((link) => <a href={`${home}${link.href}`}>{link.label}</a>)}
+    </nav>
+    <div class="actions">
+      <ThemeToggle />
+      <Button href={REPO_URL} variant="secondary" size="md" label={service.githubLabel(shownStars)}>
+        <Icon name="github" size="sm" />
+        <span>{nav.github}</span>
+        {shownStars !== null && <span class="stars" aria-hidden="true">★ {formatCount(shownStars)}</span>}
+      </Button>
+    </div>
+  </div>
+</header>
+
+<style>
+  .nav {
+    position: fixed;
+    inset-block-start: 0;
+    inset-inline: 0;
+    z-index: var(--z-sticky);
+    block-size: var(--web-nav-h);
+    background: var(--surface-content);
+  }
+  /* The bottom hairline appears only after scrolling (scroll-driven, no JavaScript). */
+  .nav::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: 0;
+    block-size: var(--web-hairline);
+    background: var(--border-hairline);
+    opacity: 0;
+  }
+  @supports (animation-timeline: scroll()) {
+    .nav::after {
+      animation: nav-line linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 var(--web-nav-line-range);
+    }
+  }
+  @keyframes nav-line {
+    to {
+      opacity: 1;
+    }
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    block-size: 100%;
+    gap: var(--space-4);
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--text-primary);
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-lg);
+  }
+  .brand:hover {
+    text-decoration: none;
+  }
+  .links {
+    display: none;
+    gap: var(--space-8);
+  }
+  .links a {
+    color: var(--text-secondary);
+    font-size: var(--font-size-lg);
+  }
+  .links a:hover {
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .stars {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-md);
+    color: var(--text-secondary);
+  }
+  @media (min-width: 768px) {
+    .links {
+      display: flex;
+    }
+  }
+</style>

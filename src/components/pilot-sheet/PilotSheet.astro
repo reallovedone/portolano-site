@@ -1,0 +1,106 @@
+---
+// Static pilot sheet (plan 4.3): a monospace column of ports. Generic names, never real hosts.
+import { pilotSheet, type ProtocolKind } from "../../content/copy";
+
+const colorVar: Record<ProtocolKind, string> = {
+  ssh: "var(--protocol-ssh)",
+  rdp: "var(--protocol-rdp)",
+  vnc: "var(--protocol-vnc)",
+  web: "var(--protocol-web)",
+  localShell: "var(--protocol-local)",
+};
+---
+
+<ol class="sheet" data-pilot>
+  {
+    pilotSheet.map((row, i) => (
+      <li class="row" style={`--row-color: ${colorVar[row.kind]}; --i: ${i}`}>
+        <span class="dot" aria-hidden="true" />
+        <span class="port">{row.port}</span>
+        <span class="proto">{row.proto}</span>
+        <span class="host">{row.host}</span>
+      </li>
+    ))
+  }
+</ol>
+
+<style>
+  .sheet {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-lg);
+    padding: var(--space-6);
+    border: var(--web-hairline) solid var(--border-hairline);
+    border-radius: var(--radius-panel);
+    background: var(--surface-window);
+  }
+  .row {
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--web-pilot-dot) var(--web-pilot-port-w) var(--web-pilot-proto-w) 1fr;
+    align-items: center;
+    column-gap: var(--space-4);
+  }
+  .row + .row {
+    margin-block-start: var(--web-pilot-row-gap);
+  }
+  /* The stroke joining a port to the next one. */
+  .row:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    inset-inline-start: calc(var(--web-pilot-dot) / 2);
+    inset-block-start: 100%;
+    block-size: var(--web-pilot-row-gap);
+    border-inline-start: var(--web-hairline) solid var(--decor-line-strong);
+    transform-origin: top;
+  }
+  .dot {
+    inline-size: var(--web-pilot-dot);
+    block-size: var(--web-pilot-dot);
+    border-radius: var(--radius-full);
+    background: var(--decor-line-strong);
+  }
+  .port {
+    color: color-mix(in srgb, var(--row-color), var(--text-primary) var(--web-protocol-text-mix));
+  }
+  .proto {
+    color: var(--text-tertiary);
+  }
+  .host {
+    color: var(--text-primary);
+  }
+
+  /* The sheet writes itself line by line when it enters view (src/scripts/motion/trace.ts adds
+     .is-writing): the dot, then port, protocol and name, then the stroke down to the next row. Only
+     with JavaScript and without reduced motion; otherwise the finished sheet above is what shows. */
+  @media screen and (prefers-reduced-motion: no-preference) {
+    :global(html.motion-ready:not(.motion-off)) .sheet:not(.is-writing) .row > :is(.dot, .port, .proto, .host) {
+      opacity: 0;
+    }
+    :global(html.motion-ready:not(.motion-off)) .sheet:not(.is-writing) .dot {
+      transform: scale(0.4);
+    }
+    :global(html.motion-ready:not(.motion-off)) .sheet:not(.is-writing) .row::after {
+      transform: scaleY(0);
+    }
+    :global(html.motion-ready:not(.motion-off)) .sheet.is-writing .row {
+      --row-delay: calc(var(--i) * var(--pilot-step));
+    }
+    :global(html.motion-ready:not(.motion-off)) .sheet.is-writing .dot,
+    :global(html.motion-ready:not(.motion-off)) .sheet.is-writing .port,
+    :global(html.motion-ready:not(.motion-off)) .sheet.is-writing .proto,
+    :global(html.motion-ready:not(.motion-off)) .sheet.is-writing .host {
+      transition:
+        opacity var(--pilot-row-dur) var(--ease-out) calc(var(--row-delay) + var(--part-delay, 0ms)),
+        transform var(--pilot-row-dur) var(--ease-out) var(--row-delay);
+    }
+    :global(html.motion-ready:not(.motion-off)) .sheet.is-writing .proto {
+      --part-delay: var(--pilot-part-delay);
+    }
+    :global(html.motion-ready:not(.motion-off)) .sheet.is-writing .host {
+      --part-delay: calc(var(--pilot-part-delay) * 2);
+    }
+    :global(html.motion-ready:not(.motion-off)) .sheet.is-writing .row::after {
+      transition: transform var(--web-duration-reveal) var(--ease-out) calc(var(--row-delay) + var(--pilot-link-delay));
+    }
+  }
+</style>

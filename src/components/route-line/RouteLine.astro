@@ -1,0 +1,82 @@
+---
+// Route line (plan 4.2): decorative vertical line in the left margin with one dot per section.
+// Rendered empty; src/scripts/motion/routeline.ts adds the dots and moves the travelled part.
+// Absent without JavaScript, below 1280 px and in print. The container is 1120 px wide, so at
+// 1280 px the margin is 80 px and the line sits in the middle of it.
+---
+
+<div class="route-line" aria-hidden="true" data-route-line>
+  <span class="base"></span>
+  <span class="fill" data-route-fill></span>
+</div>
+
+<style is:global>
+  :root {
+    --route-dot: 9px;
+    --route-line-w: 1px;
+    --route-active-scale: 1.4;
+    --route-z: 2;
+  }
+  .route-line {
+    display: none;
+  }
+  @media screen and (min-width: 1280px) {
+    html.motion-ready:not(.motion-off) .route-line {
+      display: block;
+      position: absolute;
+      inset-block-start: 0;
+      /* Middle of the margin between the viewport edge and the container. */
+      inset-inline-start: calc((100% - var(--web-container)) / 4);
+      inline-size: 0;
+      block-size: 0;
+      z-index: var(--route-z);
+      pointer-events: none;
+    }
+    .route-line .base,
+    .route-line .fill {
+      position: absolute;
+      inset-block-start: var(--route-start, 0);
+      block-size: var(--route-length, 0);
+      inline-size: var(--route-line-w);
+      margin-inline-start: calc(var(--route-line-w) / -2);
+    }
+    .route-line .base {
+      background: var(--decor-line-strong);
+    }
+    /* The travelled part: scaled from the first dot down. */
+    .route-line .fill {
+      background: var(--border-strong);
+      transform: scaleY(0);
+      transform-origin: top;
+    }
+    .route-line__port {
+      position: absolute;
+      inset-block-start: var(--route-y, 0);
+      inset-inline-start: 0;
+      inline-size: var(--route-dot);
+      block-size: var(--route-dot);
+      border: var(--route-line-w) solid var(--decor-line-strong);
+      border-radius: var(--radius-full);
+      translate: -50% -50%;
+    }
+    .route-line__port[data-state="past"] {
+      background: var(--border-strong);
+      border-color: var(--border-strong);
+    }
+    .route-line__port[data-state="active"] {
+      border-color: var(--accent);
+      background: var(--accent);
+      transform: scale(var(--route-active-scale));
+    }
+  }
+  @media screen and (min-width: 1280px) and (prefers-reduced-motion: no-preference) {
+    .route-line__port {
+      transition: transform var(--web-duration-fade) var(--ease-out);
+    }
+  }
+  @media print {
+    .route-line {
+      display: none !important;
+    }
+  }
+</style>

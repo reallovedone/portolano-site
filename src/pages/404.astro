@@ -1,0 +1,46 @@
+---
+import Base from "../layouts/Base.astro";
+import Footer from "../components/Footer.astro";
+import Nav from "../components/Nav.astro";
+import Button from "../components/Button.astro";
+import Compass from "../components/hero/Compass.astro";
+import { service } from "../content/copy";
+import { getGithubData } from "../lib/github";
+
+const data = await getGithubData();
+const { notFound } = service;
+---
+
+<Base title={`${notFound.title} — Portolano`} canonical={false} noindex>
+  <Nav stars={data.stars} home="/" />
+  <main id="main" class="lost">
+    <Compass placement="center" />
+    <div class="container copy">
+      <h1 class="t-display">{notFound.title}</h1>
+      <p class="t-lead">{notFound.text}</p>
+      <Button href="/" variant="primary" size="lg">{notFound.link}</Button>
+    </div>
+  </main>
+  <Footer home="/" />
+</Base>
+
+<style>
+  .lost {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-block-size: calc(var(--web-hero-min-h) - var(--web-nav-h));
+    margin-block-start: var(--web-nav-h);
+    background: var(--surface-content);
+  }
+  .copy {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-6);
+    text-align: center;
+  }
+</style>

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" fill="none">
+  <title>Portolano app icon</title>
+  <!-- macOS-style tile: 824 px rounded square centred in a 1024 canvas, graphite, white glyph. -->
+  <defs>
+    <linearGradient id="tile" x1="512" y1="100" x2="512" y2="924" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3b3e44"/>
+      <stop offset="1" stop-color="#1f2124"/>
+    </linearGradient>
+  </defs>
+  <rect x="100" y="100" width="824" height="824" rx="186" fill="url(#tile)"/>
+  <g transform="translate(512 512) scale(1.26) translate(-276 -258)">
+    <path d="M172 424V196A104 104 0 1 1 276 300" stroke="#fff" stroke-width="52" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="276" cy="196" r="34" fill="#fff"/>
+  </g>
+</svg>

@@ -1,0 +1,176 @@
+---
+import Compass from "../hero/Compass.astro";
+import Button from "../Button.astro";
+import Eyebrow from "../Eyebrow.astro";
+import { download, hero } from "../../content/copy";
+import type { GithubData } from "../../lib/github";
+
+interface Props {
+  data: GithubData;
+}
+const { data } = Astro.props;
+---
+
+<section
+  id="download"
+  class="download"
+  aria-labelledby="download-title"
+  data-download-root
+  data-macos-arm={data.installers.macosArm}
+  data-windows={data.installers.windows}
+  data-label-macos={hero.downloadMac}
+  data-label-windows={hero.downloadWindows}
+>
+  <Compass placement="corner" />
+  <div class="container inner">
+    <header class="head">
+      <Eyebrow>{download.eyebrow}</Eyebrow>
+      <h2 id="download-title" class="t-h2">{download.title}</h2>
+      <p class="t-lead">{download.subtitle(data.version)}</p>
+    </header>
+    <!-- Without JavaScript: the three secondary buttons, no primary download button.
+         The script in this file reveals the primary one for the detected system. -->
+    <p class="other" data-other-note hidden>{download.otherSystems}</p>
+    <div class="buttons">
+      <div class="primary" data-primary hidden>
+        <div class="primary-row">
+          <Button href={data.installers.macosArm} variant="primary" size="lg" data-primary-link>
+            {hero.downloadMac}
+          </Button>
+          <Button href={data.installers.macosIntel} variant="text" data-intel-link hidden>
+            {download.intelMac}
+          </Button>
+        </div>
+      </div>
+      <Button href={data.installers.macosArm} size="lg" data-secondary="macos-arm">
+        {download.installers.macosArm}
+      </Button>
+      <Button href={data.installers.macosIntel} size="lg" data-secondary="macos-intel">
+        {download.installers.macosIntel}
+      </Button>
+      <Button href={data.installers.windows} size="lg" data-secondary="windows">
+        {download.installers.windows}
+      </Button>
+    </div>
+    <div class="links">
+      <Button href={data.releasesUrl} variant="text">{download.allReleases}</Button>
+      <Button href={data.checksumsUrl} variant="text">{download.checksums}</Button>
+    </div>
+    <p class="note">{download.note}</p>
+    <div class="build">
+      <h3 class="t-h3">{download.buildTitle}</h3>
+      <pre class="code"><code>{download.buildCode}</code></pre>
+    </div>
+  </div>
+</section>
+
+<style>
+  .download {
+    position: relative;
+    overflow: hidden;
+    padding-block: var(--web-section-y);
+    background: var(--surface-content);
+  }
+  .inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-8);
+  }
+  .head {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    max-inline-size: var(--web-measure);
+  }
+  .buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+  /* Button sets its own display, which would otherwise beat the hidden attribute. */
+  .download :global([hidden]) {
+    display: none !important;
+  }
+  .primary-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-4);
+  }
+  .other {
+    color: var(--text-secondary);
+    font-size: var(--web-body-size);
+  }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-6);
+  }
+  .note {
+    max-inline-size: var(--web-measure);
+    color: var(--text-secondary);
+    font-size: var(--web-small-size);
+    line-height: var(--web-small-leading);
+  }
+  .build {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    max-inline-size: 100%;
+    margin-block-start: var(--space-8);
+  }
+  .code {
+    margin: 0;
+    padding: var(--space-4) var(--space-5);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    border: var(--web-hairline) solid var(--border-hairline);
+    border-radius: var(--radius-panel);
+    background: var(--surface-window);
+    font-family: var(--font-mono);
+    font-size: var(--web-code-size);
+    line-height: var(--web-body-leading);
+  }
+</style>
+
+<script>
+  import { detectOs } from "../../lib/platform";
+
+  // Upgrades the download buttons for the detected system. No network: the installer URLs
+  // are rendered into data attributes at build time.
+  const root = document.querySelector<HTMLElement>("[data-download-root]");
+  if (root) {
+    const { macosArm, windows, labelMacos, labelWindows } = root.dataset;
+    const os = detectOs(navigator);
+
+    if (os === "other") {
+      root.querySelector<HTMLElement>("[data-other-note]")?.removeAttribute("hidden");
+    } else if (macosArm && windows && labelMacos && labelWindows) {
+      const isMac = os === "macos";
+      const href = isMac ? macosArm : windows;
+      const label = isMac ? labelMacos : labelWindows;
+
+      const primary = root.querySelector<HTMLElement>("[data-primary]");
+      const link = root.querySelector<HTMLAnchorElement>("[data-primary-link]");
+      if (primary && link) {
+        link.href = href;
+        link.textContent = label;
+        root.querySelector<HTMLElement>("[data-intel-link]")?.toggleAttribute("hidden", !isMac);
+        primary.removeAttribute("hidden");
+        // The other installers stay as secondary buttons; the detected one is now primary.
+        const covered = isMac ? ["macos-arm", "macos-intel"] : ["windows"];
+        for (const key of covered) {
+          root.querySelector<HTMLElement>(`[data-secondary="${key}"]`)?.setAttribute("hidden", "");
+        }
+      }
+
+      // Hero secondary button (owned by the hero component).
+      for (const el of document.querySelectorAll<HTMLAnchorElement>("[data-os-download]")) {
+        el.href = href;
+        el.textContent = label;
+      }
+    }
+  }
+</script>

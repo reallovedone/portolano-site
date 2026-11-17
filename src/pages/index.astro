@@ -1,0 +1,231 @@
+---
+import Base from "../layouts/Base.astro";
+import Footer from "../components/Footer.astro";
+import Icon from "../components/Icon.astro";
+import Nav from "../components/Nav.astro";
+import ProtocolCard from "../components/ProtocolCard.astro";
+import Section from "../components/Section.astro";
+import Button from "../components/Button.astro";
+import DownloadSection from "../components/download/DownloadSection.astro";
+import GithubBand from "../components/github/GithubBand.astro";
+import Hero from "../components/hero/Hero.astro";
+import RouteLine from "../components/route-line/RouteLine.astro";
+import PilotSheet from "../components/pilot-sheet/PilotSheet.astro";
+import Showcase from "../components/showcase/Showcase.astro";
+import { features, name, security, SECURITY_URL } from "../content/copy";
+import { getGithubData } from "../lib/github";
+import { buildSoftwareApplication } from "../lib/seo";
+import "../scripts/motion/motion.css";
+
+const data = await getGithubData();
+const jsonLd = buildSoftwareApplication({ site: Astro.site!, version: data.version });
+---
+
+<Base jsonLd={jsonLd}>
+  <Nav stars={data.stars} />
+  <main id="main">
+    <Hero data={data} />
+    <GithubBand data={data} />
+
+    <Section titleId="name-title" eyebrow={name.eyebrow} title={name.title}>
+      <div class="name-grid">
+        <div class="name-text">
+          {
+            name.paragraphs.map((parts) => (
+              <p class="t-lead">
+                {parts.map((part) => (typeof part === "string" ? part : <em>{part.em}</em>))}
+              </p>
+            ))
+          }
+          <p class="name-note t-small">{name.note}</p>
+        </div>
+        <PilotSheet />
+      </div>
+    </Section>
+
+    <Section id="features" tone="window" titleId="features-title" eyebrow={features.eyebrow} title={features.title}>
+      <ul class="protocols" data-reveal-items>
+        {features.protocols.map((p) => <li><ProtocolCard {...p} /></li>)}
+      </ul>
+      <ul class="extras">
+        {
+          features.extras.map((e) => (
+            <li class="extra">
+              <span class="plate"><Icon name={e.icon} /></span>
+              <div>
+                <h3 class="extra-title">{e.title}</h3>
+                <p class="extra-text">{e.text}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </Section>
+
+    <Showcase />
+
+    <Section id="security" tone="window" titleId="security-title" eyebrow={security.eyebrow} title={security.title} lead={security.subtitle}>
+      <ul class="cards">
+        {
+          security.cards.map((c) => (
+            <li class="sec-card">
+              <h3 class="t-h3">{c.title}</h3>
+              <p>{c.text}</p>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="foundations">{security.foundations}</p>
+      <div class="limits">
+        <h3 class="t-h3">{security.limits.title}</h3>
+        <p>{security.limits.text}</p>
+        <Button href={SECURITY_URL} variant="text">{security.limits.link}</Button>
+      </div>
+    </Section>
+
+    <DownloadSection data={data} />
+  </main>
+  <Footer />
+  <RouteLine />
+</Base>
+
+<script>
+  import "../scripts/motion/index";
+</script>
+
+<style>
+  .name-grid {
+    display: grid;
+    gap: var(--web-space-14);
+    align-items: start;
+  }
+  .name-text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    max-inline-size: var(--web-measure);
+  }
+  .name-text .t-lead {
+    color: var(--text-secondary);
+  }
+  .name-text em {
+    color: var(--text-primary);
+  }
+  .name-note {
+    font-family: var(--font-mono);
+    color: var(--text-tertiary);
+  }
+
+  .protocols {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: 1fr;
+  }
+  .protocols > li {
+    display: flex;
+  }
+  .protocols > li > :global(.card) {
+    flex: 1;
+  }
+  .extras {
+    display: grid;
+    gap: var(--space-8);
+    grid-template-columns: 1fr;
+  }
+  .extra {
+    display: flex;
+    gap: var(--space-4);
+    align-items: flex-start;
+  }
+  .plate {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    inline-size: var(--web-icon-plate);
+    block-size: var(--web-icon-plate);
+    border: var(--web-hairline) solid var(--border-hairline);
+    border-radius: var(--radius-control);
+    background: var(--surface-content);
+    color: var(--text-secondary);
+  }
+  .extra-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+  }
+  .extra-text {
+    margin-block-start: var(--space-1);
+    color: var(--text-secondary);
+    font-size: var(--font-size-lg);
+    line-height: var(--line-height-relaxed);
+  }
+
+  .cards {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: 1fr;
+  }
+  .sec-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--web-card-pad);
+    border: var(--web-hairline) solid var(--border-hairline);
+    border-radius: var(--radius-panel);
+    background: var(--surface-content);
+  }
+  .sec-card p {
+    color: var(--text-secondary);
+    line-height: var(--line-height-relaxed);
+  }
+  .foundations {
+    font-family: var(--font-mono);
+    font-size: var(--web-small-size);
+    color: var(--text-tertiary);
+  }
+  .limits {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--web-card-pad);
+    border: var(--web-hairline) solid var(--border-strong);
+    border-radius: var(--radius-panel);
+    background: var(--surface-content);
+  }
+  .limits p {
+    max-inline-size: var(--web-measure);
+    color: var(--text-secondary);
+    line-height: var(--line-height-relaxed);
+  }
+
+  @media (min-width: 480px) {
+    .protocols {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (min-width: 768px) {
+    .name-grid {
+      grid-template-columns: 1.2fr 1fr;
+      gap: var(--web-space-16);
+    }
+    .protocols > li:last-child {
+      grid-column: 1 / -1;
+    }
+    .extras,
+    .cards {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (min-width: 1024px) {
+    .protocols {
+      grid-template-columns: repeat(6, 1fr);
+    }
+    .protocols > li {
+      grid-column: span 2;
+    }
+    .protocols > li:nth-child(n + 4) {
+      grid-column: span 3;
+    }
+  }
+</style>

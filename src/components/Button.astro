@@ -1,0 +1,82 @@
+---
+interface Props {
+  href: string;
+  variant?: "primary" | "secondary" | "text";
+  size?: "lg" | "md";
+  label?: string; // accessible name override
+  class?: string;
+  [attr: string]: unknown;
+}
+const { href, variant = "secondary", size = "md", label, class: className, ...rest } = Astro.props;
+---
+
+<a
+  class:list={["btn", `btn-${variant}`, `btn-${size}`, className]}
+  href={href}
+  aria-label={label}
+  {...rest}
+>
+  <slot />
+</a>
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    border-radius: var(--radius-control);
+    font-family: inherit;
+    font-size: var(--web-body-size);
+    font-weight: var(--web-button-weight);
+    line-height: 1;
+    white-space: nowrap;
+    text-decoration: none;
+    transition:
+      background-color var(--duration-fast) var(--ease-standard),
+      border-color var(--duration-fast) var(--ease-standard),
+      color var(--duration-fast) var(--ease-standard);
+  }
+  .btn:hover {
+    text-decoration: none;
+  }
+  .btn-lg {
+    block-size: var(--web-button-h-lg);
+    padding-inline: var(--web-button-pad-lg);
+  }
+  .btn-md {
+    block-size: var(--web-button-h);
+    padding-inline: var(--web-button-pad);
+    font-size: var(--font-size-lg);
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: var(--text-on-accent);
+  }
+  .btn-primary:hover {
+    background: var(--accent-hover);
+  }
+  .btn-primary:active {
+    background: var(--accent-pressed);
+  }
+  .btn-secondary {
+    background: var(--surface-control);
+    color: var(--text-primary);
+    border: var(--web-hairline) solid var(--border-hairline);
+    box-shadow: var(--shadow-control);
+  }
+  .btn-secondary:hover {
+    background: var(--surface-control-hover);
+  }
+  .btn-secondary:active {
+    background: var(--surface-control-pressed);
+  }
+  .btn-text {
+    block-size: auto;
+    padding: var(--space-2) 0;
+    color: var(--text-link);
+  }
+  .btn-text:hover {
+    text-decoration: underline;
+  }
+</style>

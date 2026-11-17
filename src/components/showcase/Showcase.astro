@@ -1,0 +1,145 @@
+---
+// Showcase (plan 3.5). Without JavaScript: the four screenshots stacked in a column, each with its
+// caption (the agreed static state). With the motion script running (html.motion-ready) the same figures become the panels of
+// a tabbed window: tablist above, one panel visible at a time, 200 ms crossfade (tabs.ts wires it).
+import Section from "../Section.astro";
+import ThemedScreen from "../ThemedScreen.astro";
+import WindowFrame from "../WindowFrame.astro";
+import { showcase } from "../../content/copy";
+---
+
+<Section titleId="showcase-title" eyebrow={showcase.eyebrow} title={showcase.title} lead={showcase.subtitle}>
+  <div class="showcase" data-showcase>
+    <!-- Shown only with JavaScript. The tablist takes its name from the section title. -->
+    <div class="tabs" role="tablist" aria-labelledby="showcase-title">
+      {
+        showcase.screens.map((screen, i) => (
+          <button
+            type="button"
+            role="tab"
+            class="tab"
+            id={`tab-${screen.id}`}
+            aria-controls={`panel-${screen.id}`}
+            aria-selected={i === 0 ? "true" : "false"}
+            tabindex={i === 0 ? 0 : -1}
+          >
+            {screen.tab}
+          </button>
+        ))
+      }
+      <span class="indicator" aria-hidden="true" data-indicator></span>
+    </div>
+    <div class="stage">
+      {
+        showcase.screens.map((screen, i) => (
+          <div class:list={["item", { "is-active": i === 0 }]} id={`panel-${screen.id}`} data-panel>
+            <figure class="shot">
+              <WindowFrame>
+                <ThemedScreen id={screen.id} alt={screen.alt} sizes="(min-width: 1064px) 1000px, calc(100vw - 32px)" />
+              </WindowFrame>
+              <figcaption class="caption">{screen.caption}</figcaption>
+            </figure>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</Section>
+
+<style>
+  .showcase {
+    inline-size: 100%;
+    max-inline-size: var(--web-showcase-max);
+    margin-inline: auto;
+  }
+  .stage {
+    display: flex;
+    flex-direction: column;
+    gap: var(--web-space-16);
+  }
+  /* The panel is a div (role=tabpanel is not allowed on figure); the figure keeps the old layout. */
+  .shot {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .caption {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: var(--font-size-lg);
+  }
+
+  .tabs {
+    display: none;
+  }
+
+  /* ---- With JavaScript: tabs --------------------------------------------- */
+  :global(html.motion-ready:not(.motion-off)) .showcase {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+  :global(html.motion-ready:not(.motion-off)) .tabs {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    border-bottom: var(--web-hairline) solid var(--border-hairline);
+  }
+  .tab {
+    flex: none;
+    margin: 0;
+    padding: var(--space-3) var(--space-4);
+    border: 0;
+    background: none;
+    color: var(--text-secondary);
+    font: inherit;
+    font-weight: var(--font-weight-medium);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color var(--duration-base) var(--ease-standard);
+  }
+  @media (max-width: 479px) {
+    .tab {
+      padding-inline: var(--space-3);
+    }
+  }
+  .tab:hover,
+  .tab[aria-selected="true"] {
+    color: var(--text-primary);
+  }
+  /* A 1 px box that is moved and stretched with transform to sit under the active tab. */
+  .indicator {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    inline-size: 1px;
+    block-size: var(--showcase-indicator-h);
+    background: var(--accent);
+    transform-origin: left;
+  }
+  :global(html.motion-ready:not(.motion-off)) .tabs.is-ready .indicator {
+    transition: transform var(--web-duration-fade) var(--ease-out);
+  }
+
+  /* All panels share one grid cell, so the stage keeps the height of the tallest one. */
+  :global(html.motion-ready:not(.motion-off)) .stage {
+    display: grid;
+    gap: 0;
+  }
+  :global(html.motion-ready:not(.motion-off)) .item {
+    grid-area: 1 / 1;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity var(--web-duration-fade) var(--ease-standard),
+      visibility 0s linear var(--web-duration-fade);
+  }
+  :global(html.motion-ready:not(.motion-off)) .item.is-active {
+    opacity: 1;
+    visibility: visible;
+    transition:
+      opacity var(--web-duration-fade) var(--ease-standard),
+      visibility 0s;
+  }
+</style>

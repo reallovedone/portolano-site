@@ -1,0 +1,448 @@
+/* Copied verbatim from the Portolano app: ui/src/lib/design/tokens.css @ ff6f05c.
+   Do not edit here. Run scripts/sync-tokens.sh to refresh. Web-only additions live in web.css. */
+/* ==========================================================================
+   Portolano design tokens.
+
+   This file is the ONLY place in the UI where colour, size and font literals live. Components
+   and screens reference the semantic custom properties below, never raw values.
+
+   Theme model
+   - `:root` holds the light theme and every theme-independent token.
+   - `prefers-color-scheme: dark` switches to dark unless `data-theme="light"` is set on <html>.
+   - `data-theme="dark"` / `data-theme="light"` on <html> force a theme (gallery and tests).
+   - The two dark blocks must stay identical; tokens.test.ts enforces it.
+
+   Palette idea: neutral graphite surfaces with a slight cool tint, one restrained blue accent
+   that appears ONLY on selection, the focus ring and the primary action, and quiet hues that
+   live only on the small protocol icons and on state messages.
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+
+  /* ---- Surfaces ---------------------------------------------------------
+     window   : app background behind panels, toolbars and the status bar
+     sidebar  : slightly tinted, solid (a real vibrancy effect is not enabled)
+     content  : the main reading/working area
+     raised   : menus, popovers, dialogs, toasts (always paired with a shadow and a hairline)
+     field    : text inputs and selects
+     control  : buttons, segmented thumb, other raised controls
+     inset    : recessed tracks (segmented control, switch off, progress)
+     hover / pressed: translucent overlays for plain (borderless) elements on any surface */
+  --surface-window: #f3f3f5;
+  --surface-sidebar: #eceef1;
+  --surface-content: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-field: #ffffff;
+  --surface-control: #ffffff;
+  --surface-control-hover: #f6f6f8;
+  --surface-control-pressed: #ececef;
+  --surface-inset: rgb(60 66 80 / 12%);
+  --surface-hover: rgb(60 66 80 / 8%);
+  --surface-pressed: rgb(60 66 80 / 14%);
+
+  /* ---- Text -------------------------------------------------------------
+     primary / secondary / tertiary all meet WCAG AA (4.5:1) on every surface above.
+     disabled is intentionally lower (inactive controls are exempt from the contrast rule). */
+  --text-primary: #1c1c1e;
+  --text-secondary: #4f525a;
+  --text-tertiary: #666a73;
+  --text-disabled: #a4a7ae;
+  --text-on-accent: #ffffff;
+  --text-link: #0a5bbf;
+
+  /* ---- Separators and borders ----------------------------------------- */
+  --border-hairline: rgb(30 34 44 / 11%);
+  --border-strong: rgb(30 34 44 / 24%);
+
+  /* ---- Decoration: chart lines behind empty areas (never behind text) ---- */
+  --decor-line: rgb(30 34 44 / 7%);
+  --decor-line-strong: rgb(30 34 44 / 14%);
+  --decor-text: rgb(30 34 44 / 34%);
+  --segment-selected-bg: #ffffff;
+
+  /* ---- Accent: selection, focus ring and the primary action ONLY ---------
+     accent      : fill (primary button, checked controls); white text passes AA on it
+     accent-text : accent used as text or an icon on a surface
+     accent-subtle: faint tint for a hovered/active accent area */
+  --accent: #0b64cf;
+  --accent-hover: #0a58b8;
+  --accent-pressed: #084a9c;
+  --accent-text: #0a5bbf;
+  --accent-subtle: rgb(11 100 207 / 10%);
+
+  /* ---- Focus ring ----------------------------------------------------- */
+  --focus-ring: #1a73e0;
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 1px;
+
+  /* ---- Selection --------------------------------------------------------
+     selection-bg          : selected list row in the active window (text stays primary)
+     selection-bg-inactive : same row when the window is not focused (set via data-window-active)
+     selection-solid-*     : menu highlight (macOS style: solid accent with white text) */
+  --selection-bg: rgb(11 100 207 / 15%);
+  --selection-bg-inactive: rgb(60 66 80 / 14%);
+  --selection-solid-bg: #0b64cf;
+  --selection-solid-fg: #ffffff;
+  --text-selection-bg: rgb(11 100 207 / 28%);
+
+  /* ---- States: each has text, bg, border (+ a solid fill for danger) --- */
+  --danger-text: #b42318;
+  --danger-bg: #fdecea;
+  --danger-border: #f2b8b2;
+  --danger-solid: #c8261a;
+  --danger-solid-hover: #b01f14;
+  --danger-solid-pressed: #96190f;
+  --warning-text: #7f4c00;
+  --warning-bg: #fff4dc;
+  --warning-border: #ecd196;
+  --success-text: #1b6b37;
+  --success-bg: #e8f6ed;
+  --success-border: #b3dcc1;
+  --info-text: #0a5bbf;
+  --info-bg: #e8f1fc;
+  --info-border: #b2cff2;
+
+  /* ---- Scrim and shadows (shadows only for floating elements) --------- */
+  --scrim: rgb(20 22 28 / 32%);
+  --shadow-control: 0 1px 1px rgb(20 22 28 / 6%), 0 0 0 0.5px rgb(20 22 28 / 6%);
+  --shadow-popover: 0 0 0 0.5px rgb(20 22 28 / 14%), 0 6px 20px rgb(20 22 28 / 14%),
+    0 2px 6px rgb(20 22 28 / 8%);
+  --shadow-dialog: 0 0 0 0.5px rgb(20 22 28 / 16%), 0 18px 48px rgb(20 22 28 / 22%),
+    0 4px 12px rgb(20 22 28 / 10%);
+
+  /* ---- Protocol colours: one quiet hue per kind, used ONLY on small icons */
+  --protocol-folder: #7a8594;
+  --protocol-local: #596270;
+  --protocol-ssh: #1b7f60;
+  --protocol-rdp: #2d6fcb;
+  --protocol-vnc: #7a55b8;
+  --protocol-web: #b5651a;
+
+  /* ---- Terminal -----------------------------------------------------------
+     terminal-bg          : background of the whole terminal pane (xterm and the padding around it)
+     terminal-line-height : xterm line height multiplier
+     letterbox-bg         : dark neutral around a scaled remote desktop, in BOTH themes
+     ansi-*               : the 16 ANSI colours; each has at least 4.5:1 on terminal-bg of its
+                            theme (checked by tokens.test.ts), so none is ever unreadable. */
+  --terminal-bg: #ffffff;
+  --terminal-line-height: 1.2;
+  --letterbox-bg: #3d3e43;
+  --ansi-black: #1c1c1e;
+  --ansi-red: #c8261a;
+  --ansi-green: #1b6b37;
+  --ansi-yellow: #8a5a00;
+  --ansi-blue: #0a5bbf;
+  --ansi-magenta: #7a3fa8;
+  --ansi-cyan: #0b7285;
+  --ansi-white: #666a73;
+  --ansi-bright-black: #585c65;
+  --ansi-bright-red: #d63a2c;
+  --ansi-bright-green: #23803f;
+  --ansi-bright-yellow: #9c6500;
+  --ansi-bright-blue: #1f6fd6;
+  --ansi-bright-magenta: #8e52bd;
+  --ansi-bright-cyan: #0d8095;
+  --ansi-bright-white: #4f525a;
+
+  /* ---- Typography ------------------------------------------------------- */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI Variable", "Segoe UI", system-ui,
+    sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-md: 13px;
+  --font-size-lg: 15px;
+  --font-size-xl: 20px;
+  --font-size-hero: 28px;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.4;
+  --line-height-relaxed: 1.55;
+
+  /* ---- Spacing: 4 px grid ---------------------------------------------- */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* ---- Radii ------------------------------------------------------------ */
+  --radius-xs: 4px;
+  --radius-control: 6px;
+  --radius-panel: 10px;
+  --radius-full: 999px;
+
+  /* ---- Control heights (macOS-like density) --------------------------- */
+  --control-h-compact: 24px;
+  --control-h-regular: 28px;
+  --control-h-large: 32px;
+
+  /* ---- Component metrics (sizes that are not on the spacing scale) ----- */
+  --icon-size-sm: 14px;
+  --icon-size-md: 16px;
+  --icon-size-lg: 20px;
+  --checkbox-size: 16px;
+  --switch-width: 34px;
+  --switch-height: 20px;
+  --switch-thumb: 16px;
+  --splitter-hit: 6px;
+  --scrollbar-size: 10px;
+  --menu-min-width: 200px;
+  --toast-width: 380px;
+  --tooltip-max-width: 240px;
+  --tab-min-width: 96px;
+  --tab-max-width: 200px;
+  --form-label-width: 140px;
+  --dialog-width-sm: 380px;
+  --dialog-width-md: 480px;
+  --dialog-width-lg: 640px;
+  --spinner-width: 2px;
+
+  /* ---- Window chrome -----------------------------------------------------
+     Height of the strip that carries the macOS traffic lights (0 elsewhere). The platform
+     helper sets data-platform on <html>. Nothing may assume a fixed title bar height: child
+     webviews derive their offset from innerHeight - viewport height. */
+  --titlebar-height: 0px;
+  --titlebar-safe-left: 0px;
+
+  /* ---- Layers ----------------------------------------------------------- */
+  --z-base: 0;
+  --z-splitter: 5;
+  --z-sticky: 10;
+  --z-dropdown: 50;
+  --z-overlay: 100;
+  --z-menu: 200;
+  --z-toast: 300;
+  --z-tooltip: 400;
+
+  /* ---- Motion ----------------------------------------------------------- */
+  --duration-fast: 120ms;
+  --duration-base: 160ms;
+  --duration-slow: 200ms;
+  --duration-spin: 800ms;
+  --ease-standard: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Dark theme, system preference. KEEP IDENTICAL to the [data-theme="dark"] block below. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --surface-window: #26272b;
+    --surface-sidebar: #2d2e33;
+    --surface-content: #1e1f22;
+    --surface-raised: #303136;
+    --surface-field: #1a1b1e;
+    --surface-control: #303136;
+    --surface-control-hover: #3a3b42;
+    --surface-control-pressed: #45464e;
+    --surface-inset: rgb(255 255 255 / 10%);
+    --surface-hover: rgb(255 255 255 / 8%);
+    --surface-pressed: rgb(255 255 255 / 14%);
+
+    --text-primary: #f2f2f5;
+    --text-secondary: #b9bbc3;
+    --text-tertiary: #a3a6ae;
+    --text-disabled: #62646c;
+    --text-on-accent: #ffffff;
+    --text-link: #6cb0ff;
+
+    --border-hairline: rgb(255 255 255 / 10%);
+    --border-strong: rgb(255 255 255 / 22%);
+
+    --decor-line: rgb(255 255 255 / 6%);
+    --decor-line-strong: rgb(255 255 255 / 12%);
+    --decor-text: rgb(255 255 255 / 32%);
+    --segment-selected-bg: #5c5d66;
+
+    --accent: #1766cf;
+    --accent-hover: #1f72dc;
+    --accent-pressed: #1259b5;
+    --accent-text: #6cb0ff;
+    --accent-subtle: rgb(108 176 255 / 14%);
+
+    --focus-ring: #4d9bff;
+
+    --selection-bg: rgb(77 155 255 / 24%);
+    --selection-bg-inactive: rgb(255 255 255 / 12%);
+    --selection-solid-bg: #1766cf;
+    --selection-solid-fg: #ffffff;
+    --text-selection-bg: rgb(77 155 255 / 38%);
+
+    --danger-text: #ff8d84;
+    --danger-bg: #3b2427;
+    --danger-border: #6e3b40;
+    --danger-solid: #cb3226;
+    --danger-solid-hover: #d63c30;
+    --danger-solid-pressed: #b72a1f;
+    --warning-text: #f2b95c;
+    --warning-bg: #3a3120;
+    --warning-border: #62502a;
+    --success-text: #72d38d;
+    --success-bg: #1f3226;
+    --success-border: #2f5a3e;
+    --info-text: #7cb9ff;
+    --info-bg: #1f2f46;
+    --info-border: #2f5079;
+
+    --scrim: rgb(0 0 0 / 52%);
+    --shadow-control: 0 1px 1px rgb(0 0 0 / 30%), 0 0 0 0.5px rgb(255 255 255 / 6%);
+    --shadow-popover: 0 0 0 0.5px rgb(255 255 255 / 14%), 0 8px 24px rgb(0 0 0 / 50%),
+      0 2px 6px rgb(0 0 0 / 30%);
+    --shadow-dialog: 0 0 0 0.5px rgb(255 255 255 / 14%), 0 20px 56px rgb(0 0 0 / 60%),
+      0 4px 12px rgb(0 0 0 / 30%);
+
+    --terminal-bg: #1e1f22;
+    --letterbox-bg: #131416;
+    --ansi-black: #8d909a;
+    --ansi-red: #ff8d84;
+    --ansi-green: #72d38d;
+    --ansi-yellow: #f2b95c;
+    --ansi-blue: #7cb9ff;
+    --ansi-magenta: #c9a8f5;
+    --ansi-cyan: #5cd0d6;
+    --ansi-white: #b9bbc3;
+    --ansi-bright-black: #a3a6ae;
+    --ansi-bright-red: #ffb0a9;
+    --ansi-bright-green: #98e3ab;
+    --ansi-bright-yellow: #f8d08c;
+    --ansi-bright-blue: #a6d0ff;
+    --ansi-bright-magenta: #dcc7fa;
+    --ansi-bright-cyan: #8fe2e6;
+    --ansi-bright-white: #f2f2f5;
+
+    --protocol-folder: #9aa6b6;
+    --protocol-local: #a3acba;
+    --protocol-ssh: #55c79f;
+    --protocol-rdp: #6fa8f0;
+    --protocol-vnc: #b394e8;
+    --protocol-web: #e0954a;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --surface-window: #26272b;
+  --surface-sidebar: #2d2e33;
+  --surface-content: #1e1f22;
+  --surface-raised: #303136;
+  --surface-field: #1a1b1e;
+  --surface-control: #303136;
+  --surface-control-hover: #3a3b42;
+  --surface-control-pressed: #45464e;
+  --surface-inset: rgb(255 255 255 / 10%);
+  --surface-hover: rgb(255 255 255 / 8%);
+  --surface-pressed: rgb(255 255 255 / 14%);
+
+  --text-primary: #f2f2f5;
+  --text-secondary: #b9bbc3;
+  --text-tertiary: #a3a6ae;
+  --text-disabled: #62646c;
+  --text-on-accent: #ffffff;
+  --text-link: #6cb0ff;
+
+  --border-hairline: rgb(255 255 255 / 10%);
+  --border-strong: rgb(255 255 255 / 22%);
+
+  --decor-line: rgb(255 255 255 / 6%);
+  --decor-line-strong: rgb(255 255 255 / 12%);
+  --decor-text: rgb(255 255 255 / 32%);
+  --segment-selected-bg: #5c5d66;
+
+  --accent: #1766cf;
+  --accent-hover: #1f72dc;
+  --accent-pressed: #1259b5;
+  --accent-text: #6cb0ff;
+  --accent-subtle: rgb(108 176 255 / 14%);
+
+  --focus-ring: #4d9bff;
+
+  --selection-bg: rgb(77 155 255 / 24%);
+  --selection-bg-inactive: rgb(255 255 255 / 12%);
+  --selection-solid-bg: #1766cf;
+  --selection-solid-fg: #ffffff;
+  --text-selection-bg: rgb(77 155 255 / 38%);
+
+  --danger-text: #ff8d84;
+  --danger-bg: #3b2427;
+  --danger-border: #6e3b40;
+  --danger-solid: #cb3226;
+  --danger-solid-hover: #d63c30;
+  --danger-solid-pressed: #b72a1f;
+  --warning-text: #f2b95c;
+  --warning-bg: #3a3120;
+  --warning-border: #62502a;
+  --success-text: #72d38d;
+  --success-bg: #1f3226;
+  --success-border: #2f5a3e;
+  --info-text: #7cb9ff;
+  --info-bg: #1f2f46;
+  --info-border: #2f5079;
+
+  --scrim: rgb(0 0 0 / 52%);
+  --shadow-control: 0 1px 1px rgb(0 0 0 / 30%), 0 0 0 0.5px rgb(255 255 255 / 6%);
+  --shadow-popover: 0 0 0 0.5px rgb(255 255 255 / 14%), 0 8px 24px rgb(0 0 0 / 50%),
+    0 2px 6px rgb(0 0 0 / 30%);
+  --shadow-dialog: 0 0 0 0.5px rgb(255 255 255 / 14%), 0 20px 56px rgb(0 0 0 / 60%),
+    0 4px 12px rgb(0 0 0 / 30%);
+
+  --terminal-bg: #1e1f22;
+  --letterbox-bg: #131416;
+  --ansi-black: #8d909a;
+  --ansi-red: #ff8d84;
+  --ansi-green: #72d38d;
+  --ansi-yellow: #f2b95c;
+  --ansi-blue: #7cb9ff;
+  --ansi-magenta: #c9a8f5;
+  --ansi-cyan: #5cd0d6;
+  --ansi-white: #b9bbc3;
+  --ansi-bright-black: #a3a6ae;
+  --ansi-bright-red: #ffb0a9;
+  --ansi-bright-green: #98e3ab;
+  --ansi-bright-yellow: #f8d08c;
+  --ansi-bright-blue: #a6d0ff;
+  --ansi-bright-magenta: #dcc7fa;
+  --ansi-bright-cyan: #8fe2e6;
+  --ansi-bright-white: #f2f2f5;
+
+  --protocol-folder: #9aa6b6;
+  --protocol-local: #a3acba;
+  --protocol-ssh: #55c79f;
+  --protocol-rdp: #6fa8f0;
+  --protocol-vnc: #b394e8;
+  --protocol-web: #e0954a;
+}
+
+/* Window not focused: selections turn graphite, like system lists. The platform helper sets
+   data-window-active="false" on <html>. */
+:root[data-window-active="false"] {
+  --selection-bg: var(--selection-bg-inactive);
+}
+
+/* ---- Window chrome by platform ------------------------------------------
+   macOS uses titleBarStyle "Overlay": the traffic lights float over the webview, so the
+   sidebar reserves a strip for them. The safe-left value is the width the lights occupy. */
+:root[data-platform="macos"] {
+  --titlebar-height: 40px;
+  --titlebar-safe-left: 80px;
+}
+
+/* ---- Reduced motion: transitions collapse to (almost) instant ------------ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 1ms;
+    --duration-base: 1ms;
+    --duration-slow: 1ms;
+    --duration-spin: 2400ms;
+  }
+}

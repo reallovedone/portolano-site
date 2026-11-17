@@ -1,0 +1,46 @@
+---
+import Eyebrow from "./Eyebrow.astro";
+
+interface Props {
+  id?: string;
+  tone?: "content" | "window";
+  eyebrow?: string;
+  title: string;
+  lead?: string;
+  titleId: string;
+}
+const { id, tone = "content", eyebrow, title, lead, titleId } = Astro.props;
+---
+
+<section id={id} class:list={["section", `tone-${tone}`]} aria-labelledby={titleId}>
+  <div class="container inner" data-reveal-children>
+    <header class="head">
+      {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
+      <h2 id={titleId} class="t-h2">{title}</h2>
+      {lead && <p class="t-lead">{lead}</p>}
+    </header>
+    <slot />
+  </div>
+</section>
+
+<style>
+  .section {
+    position: relative;
+    padding-block: var(--web-section-y);
+    background: var(--surface-content);
+  }
+  .tone-window {
+    background: var(--surface-window);
+  }
+  .inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--web-space-14);
+  }
+  .head {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    max-inline-size: var(--web-measure);
+  }
+</style>

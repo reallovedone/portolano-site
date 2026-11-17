@@ -1,0 +1,74 @@
+// Pure helpers for the section motion package. No DOM access, so they can be unit tested.
+
+/** Decelerating curve, 0..1 in and out. */
+export function easeOutCubic(t: number): number {
+  const x = Math.min(1, Math.max(0, t));
+  return 1 - (1 - x) ** 3;
+}
+
+/** Value shown by a count-up `elapsed` ms after it started: an integer from 0 to `target`. */
+export function countAt(target: number, elapsed: number, duration: number): number {
+  if (duration <= 0 || elapsed >= duration) return target;
+  return Math.floor(target * easeOutCubic(elapsed / duration));
+}
+
+/**
+ * Integers up to 999, then one decimal with a "k" suffix (1.2k). Same output as `formatCount` in
+ * src/lib/github.ts (which also holds build-time fetching code, so it is not imported into the
+ * browser bundle); a test keeps the two in step.
+ */
+export function formatCount(value: number): string {
+  if (!Number.isFinite(value) || value < 0) {
+    throw new RangeError(`formatCount expects a non-negative finite number, got ${value}`);
+  }
+  const whole = Math.floor(value);
+  if (whole <= 999) return String(whole);
+  const thousands = Math.floor(whole / 100) / 10;
+  if (thousands >= 1000) return `${Math.floor(thousands / 1000)}M`;
+  return `${thousands.toFixed(1).replace(/\.0$/, "")}k`;
+}
+
+/** Delay of the `index`-th item of a staggered group. */
+export function staggerDelay(index: number, stepMs: number): number {
+  return Math.max(0, index) * stepMs;
+}
+
+/**
+ * Index of the active section: the last one whose dot is at or above the probe line.
+ * `positions` are document offsets in ascending order. Before the first dot the first one is active.
+ */
+export function activeIndex(positions: readonly number[], probe: number): number {
+  let active = 0;
+  for (let i = 0; i < positions.length; i += 1) {
+    if (positions[i] <= probe) active = i;
+    else break;
+  }
+  return active;
+}
+
+/** Length of the travelled part of the line, from its first dot to the probe line, clamped. */
+export function travelled(start: number, end: number, probe: number): number {
+  return Math.min(Math.max(probe - start, 0), Math.max(end - start, 0));
+}
+
+/** `index + delta` wrapped into 0..length-1. */
+export function wrapIndex(index: number, delta: number, length: number): number {
+  if (length <= 0) return 0;
+  return (((index + delta) % length) + length) % length;
+}
+
+/** Tab to select for a key press in a horizontal tablist, or null when the key is not handled. */
+export function tabForKey(key: string, current: number, length: number): number | null {
+  switch (key) {
+    case "ArrowRight":
+      return wrapIndex(current, 1, length);
+    case "ArrowLeft":
+      return wrapIndex(current, -1, length);
+    case "Home":
+      return 0;
+    case "End":
+      return Math.max(length - 1, 0);
+    default:
+      return null;
+  }
+}

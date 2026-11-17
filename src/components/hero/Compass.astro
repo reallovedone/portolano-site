@@ -1,0 +1,327 @@
+---
+// Portolan compass rose: same geometry and style as the app's ChartBackdrop (16 points on a
+// circle of radius 420, 120 rhumb lines, two rings, eight principal winds, five port bearings).
+// Decorative only: hidden from assistive technology, ignores the pointer. The parent must be positioned.
+//
+// Two renderings of the same drawing:
+// - static (default): one path per layer, exactly the S1 markup.
+// - animated: the same drawing split into traceable pieces (network grouped by start point, one path
+//   per wind) plus hover overlays and route lines. Without JavaScript, or with reduced motion, it
+//   looks identical to the static one; the choreography and the continuous state are CSS and
+//   src/scripts/hero/.
+import "./hero.css";
+
+interface Props {
+  /** `center`: rose centred and faded at the edges. `corner`: rose rising from the bottom-right corner. */
+  placement?: "center" | "corner";
+  /** Port bearings. Off by default in the corner variant, where most of them fall outside the visible area. */
+  labels?: boolean;
+  /** Split drawing with the load choreography hooks (hero only). */
+  animated?: boolean;
+}
+const { placement = "center", animated = false } = Astro.props;
+const labels = Astro.props.labels ?? placement === "center";
+// The corner rose traces itself once when it enters view (src/scripts/motion/); pathLength lets the dash
+// animation address every layer as one 0..1 stroke.
+const traced = placement === "corner" && !animated;
+const pathLength = traced ? 1 : undefined;
+
+const POINTS = 16;
+const RADIUS = 420;
+const round = (value: number): number => Math.round(value * 10) / 10;
+
+const nodes = Array.from({ length: POINTS }, (_, i) => {
+  const angle = (i / POINTS) * Math.PI * 2 - Math.PI / 2;
+  return { x: round(Math.cos(angle) * RADIUS), y: round(Math.sin(angle) * RADIUS), angle };
+});
+
+const segment = (a: number, b: number): string => `M${nodes[a].x} ${nodes[a].y}L${nodes[b].x} ${nodes[b].y}`;
+const range = (from: number, to: number): number[] => Array.from({ length: Math.max(0, to - from) }, (_, k) => from + k);
+
+// Network: every pair of points. Animated: one path per start point (the last point starts none).
+const networkByStart = range(0, POINTS - 1).map((a) => range(a + 1, POINTS).map((b) => segment(a, b)).join(""));
+const network = networkByStart.join("");
+// Hover overlay: every line leaving one point.
+const spokes = range(0, POINTS).map((a) =>
+  range(0, POINTS)
+    .filter((b) => b !== a)
+    .map((b) => segment(a, b))
+    .join(""),
+);
+
+const windIndexes = range(0, POINTS).filter((i) => i % 2 === 0);
+const winds = windIndexes.map((i) => `M0 0L${nodes[i].x} ${nodes[i].y}`);
+
+const BEARINGS: Array<[index: number, port: string]> = [
+  [1, "22"],
+  [4, "443"],
+  [7, "3389"],
+  [10, "5900"],
+  [13, "23"],
+];
+const bearings = BEARINGS.map(([index, port]) => {
+  const n = nodes[index];
+  return {
+    port,
+    index,
+    x: round(Math.cos(n.angle) * (RADIUS + 34)),
+    y: round(Math.sin(n.angle) * (RADIUS + 34)),
+    route: `M0 0L${n.x} ${n.y}`,
+  };
+});
+---
+
+<div class:list={["backdrop", placement, animated ? "animated" : "static"]} aria-hidden="true" data-trace={traced ? "" : undefined}>
+  {
+    animated ? (
+      <div class="rose" data-rose>
+        <div class="spin" data-spin>
+          <svg viewBox="-500 -500 1000 1000" fill="none" focusable="false" data-rose-svg>
+            {networkByStart.map((d, a) => (
+              <path class="net" d={d} pathLength="1" style={`--i:${a}`} vector-effect="non-scaling-stroke" />
+            ))}
+            {spokes.map((d, i) => <path class="spoke" d={d} data-spoke={i} vector-effect="non-scaling-stroke" />)}
+            <circle class="ring" r={RADIUS} pathLength="1" style="--i:0" vector-effect="non-scaling-stroke" />
+            <circle class="ring" r={RADIUS / 2} pathLength="1" style="--i:1" vector-effect="non-scaling-stroke" />
+            {winds.map((d, k) => <path class="wind" d={d} pathLength="1" style={`--i:${k}`} vector-effect="non-scaling-stroke" />)}
+            {bearings.map((b) => <path class="route" d={b.route} pathLength="1" data-port={b.port} data-route={b.index} vector-effect="non-scaling-stroke" />)}
+            {nodes.map((n, i) => <circle class="node" cx={n.x} cy={n.y} r={i % 2 === 0 ? 5 : 3} style={`--i:${i}`} data-node={i} />)}
+            <circle class="node core" r="6" />
+            {
+              labels &&
+                bearings.map((b, k) => (
+                  <text class="bearing" x={b.x} y={b.y} font-size="17" text-anchor="middle" dominant-baseline="middle" style={`--i:${k}`} data-port={b.port} data-bearing={b.index}>
+                    {b.port}
+                  </text>
+                ))
+            }
+            <circle class="dot" r="1.5" data-dot />
+          </svg>
+        </div>
+      </div>
+    ) : (
+      <svg viewBox="-500 -500 1000 1000" fill="none" focusable="false">
+        <path class="net" d={network} pathLength={pathLength} vector-effect="non-scaling-stroke" />
+        <circle class="ring" r={RADIUS} pathLength={pathLength} vector-effect="non-scaling-stroke" />
+        <circle class="ring" r={RADIUS / 2} pathLength={pathLength} vector-effect="non-scaling-stroke" />
+        <path class="wind" d={winds.join("")} pathLength={pathLength} vector-effect="non-scaling-stroke" />
+        {nodes.map((n, i) => <circle class="node" cx={n.x} cy={n.y} r={i % 2 === 0 ? 5 : 3} />)}
+        <circle class="node" r="6" />
+        {
+          labels &&
+            bearings.map((b) => (
+              <text class="bearing" x={b.x} y={b.y} font-size="17" text-anchor="middle" dominant-baseline="middle">
+                {b.port}
+              </text>
+            ))
+        }
+      </svg>
+    )
+  }
+</div>
+
+<style>
+  .backdrop {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    user-select: none;
+  }
+  svg {
+    position: absolute;
+    aspect-ratio: 1;
+  }
+  .static.center svg {
+    inline-size: var(--web-hero-compass-size);
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    translate: -50% -50%;
+    mask-image: radial-gradient(closest-side, black 35%, transparent 100%);
+  }
+  .static.corner svg {
+    inline-size: 120%;
+    inset-block-end: 0;
+    inset-inline-end: 0;
+    translate: 46% 52%;
+    mask-image: radial-gradient(closest-side, black 60%, transparent 100%);
+  }
+  .net {
+    stroke: var(--decor-line);
+    stroke-width: var(--web-hairline);
+  }
+  .ring,
+  .wind {
+    stroke: var(--decor-line-strong);
+    stroke-width: var(--web-hairline);
+  }
+  .node {
+    fill: var(--decor-line-strong);
+  }
+  .bearing {
+    fill: var(--decor-text);
+    font-family: var(--font-mono);
+  }
+
+  /* ---- Animated rose: layout --------------------------------------------- */
+  .animated {
+    z-index: 1;
+  }
+  /* `.rose` is the box the scroll hand-off moves and scales; `.spin` is the box that turns. */
+  .rose {
+    position: absolute;
+    inline-size: var(--web-hero-compass-size);
+    max-inline-size: none;
+    aspect-ratio: 1;
+    inset-block-start: var(--hero-rose-y);
+    inset-inline-start: 50%;
+    translate: -50% -50%;
+  }
+  .spin {
+    position: absolute;
+    inset: 0;
+  }
+  .animated svg {
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    mask-image: radial-gradient(closest-side, black 35%, transparent 100%);
+  }
+
+  /* Hover and route overlays: invisible until the script (or a pointer) lights them. */
+  .spoke {
+    stroke: var(--decor-text);
+    stroke-width: var(--web-hairline);
+    opacity: 0;
+    transition: opacity var(--duration-slow) var(--ease-standard);
+  }
+  .spoke:global(.lit) {
+    opacity: 1;
+  }
+  .route {
+    stroke-width: var(--web-hairline);
+    stroke-dasharray: 1 2;
+    opacity: 0;
+  }
+  .dot {
+    opacity: 0;
+  }
+  .route[data-port="22"],
+  .dot[data-port="22"] {
+    stroke: var(--protocol-ssh);
+    fill: var(--protocol-ssh);
+  }
+  .route[data-port="3389"],
+  .dot[data-port="3389"] {
+    stroke: var(--protocol-rdp);
+    fill: var(--protocol-rdp);
+  }
+  .route[data-port="5900"],
+  .dot[data-port="5900"] {
+    stroke: var(--protocol-vnc);
+    fill: var(--protocol-vnc);
+  }
+  .route[data-port="443"],
+  .dot[data-port="443"] {
+    stroke: var(--protocol-web);
+    fill: var(--protocol-web);
+  }
+  .route[data-port="23"],
+  .dot[data-port="23"] {
+    stroke: var(--protocol-local);
+    fill: var(--protocol-local);
+  }
+  .route {
+    fill: none;
+  }
+
+  /* ---- Animated rose: only with JavaScript and without reduced motion ------ */
+  @media (prefers-reduced-motion: no-preference) {
+    /* User-unit hairline: dashes of a traced path are not usable with non-scaling strokes.
+       The script keeps --hero-u equal to one screen pixel in user units. */
+    :global(html.js) .animated :is(.net, .ring, .wind, .spoke, .route) {
+      vector-effect: none;
+      stroke-width: var(--hero-u, 0.7px);
+    }
+    :global(html.js) .animated :is(.node, .bearing) {
+      transition: fill var(--duration-slow) var(--ease-standard);
+    }
+    :global(html.js) .animated .node {
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+    :global(html.js) .animated .bearing {
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+    :global(html.js) .animated .node:global(.lit) {
+      fill: var(--decor-text);
+    }
+    :global(html.js) .animated .bearing:global(.lit)[data-port="22"] {
+      fill: var(--protocol-ssh);
+    }
+    :global(html.js) .animated .bearing:global(.lit)[data-port="3389"] {
+      fill: var(--protocol-rdp);
+    }
+    :global(html.js) .animated .bearing:global(.lit)[data-port="5900"] {
+      fill: var(--protocol-vnc);
+    }
+    :global(html.js) .animated .bearing:global(.lit)[data-port="443"] {
+      fill: var(--protocol-web);
+    }
+    :global(html.js) .animated .bearing:global(.lit)[data-port="23"] {
+      fill: var(--protocol-local);
+    }
+
+    @keyframes trace {
+      from {
+        stroke-dasharray: 1 2;
+        stroke-dashoffset: 1;
+      }
+      to {
+        stroke-dasharray: 1 2;
+        stroke-dashoffset: 0;
+      }
+    }
+    @keyframes appear {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+    @keyframes pop {
+      from {
+        opacity: 0;
+        transform: scale(0.4);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    :global(html.js) .animated .node {
+      animation: pop var(--hero-node-dur) var(--ease-out) calc(var(--i) * var(--hero-node-step)) backwards;
+    }
+    :global(html.js) .animated .core {
+      animation: pop var(--hero-core-dur) var(--ease-out) backwards;
+    }
+    :global(html.js) .animated .wind {
+      animation: trace var(--hero-wind-dur) var(--ease-out) calc(var(--hero-wind-start) + var(--i) * var(--hero-wind-step)) backwards;
+    }
+    :global(html.js) .animated .net {
+      animation: trace var(--hero-line-dur) var(--ease-out) calc(var(--hero-line-start) + var(--i) * var(--hero-line-step)) backwards;
+    }
+    :global(html.js) .animated .ring {
+      animation: trace var(--hero-ring-dur) var(--ease-out) var(--hero-ring-start) backwards;
+      transform-box: fill-box;
+      transform-origin: center;
+      rotate: -90deg;
+    }
+    :global(html.js) .animated .bearing {
+      animation: appear var(--hero-label-dur) var(--ease-out) calc(var(--hero-label-start) + var(--i) * var(--hero-label-step)) backwards;
+    }
+  }
+</style>

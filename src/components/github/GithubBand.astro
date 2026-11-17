@@ -1,0 +1,92 @@
+---
+import Button from "../Button.astro";
+import { githubBand, REPO_URL } from "../../content/copy";
+import { formatCount, visibleStat, type GithubData } from "../../lib/github";
+
+interface Props {
+  data: GithubData;
+}
+const { data } = Astro.props;
+
+// A missing value hides its column; if all are missing only the title and buttons remain.
+// `count` is set only for the numbers that count up when they enter view (not the version).
+const stats: Array<{ text: string; label: string; count?: number }> = [
+  { value: visibleStat(data.stars), label: githubBand.statLabels.stars, text: (n: number) => formatCount(n) },
+  { value: visibleStat(data.downloads), label: githubBand.statLabels.downloads, text: (n: number) => formatCount(n) },
+]
+  .filter((s): s is { value: number; label: string; text: (n: number) => string } => s.value !== null)
+  .map((s) => ({ text: s.text(s.value), label: s.label, count: s.value }));
+if (data.version !== null) {
+  stats.push({ text: `v${data.version}`, label: githubBand.statLabels.version });
+}
+---
+
+<section class="band" aria-labelledby="github-title">
+  <div class="container inner" data-reveal-children>
+    <h2 id="github-title" class="t-h2">{githubBand.title}</h2>
+    {
+      stats.length > 0 && (
+        <dl class="stats">
+          {stats.map((s) => (
+            <div class="stat">
+              <dt class="label">{s.label}</dt>
+              <dd class="value" data-count={s.count} style={`--chars:${s.text.length}`}>{s.text}</dd>
+            </div>
+          ))}
+        </dl>
+      )
+    }
+    <div class="actions">
+      <Button href={REPO_URL} variant="primary" size="lg">{githubBand.primary}</Button>
+      <Button href={REPO_URL} variant="text">{githubBand.secondary}</Button>
+    </div>
+  </div>
+</section>
+
+<style>
+  .band {
+    padding-block: var(--web-space-16);
+    background: var(--surface-window);
+    border-block: var(--web-hairline) solid var(--border-hairline);
+  }
+  .inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-10);
+    text-align: center;
+  }
+  .stats {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-8) var(--web-stat-gap);
+  }
+  .stat {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    gap: var(--space-1);
+  }
+  .value {
+    margin: 0;
+    /* The monospace width of the final value is reserved, so counting up never moves the layout. */
+    min-inline-size: calc(var(--chars, 0) * 1ch);
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: var(--web-stat-size);
+    font-weight: var(--font-weight-semibold);
+    line-height: 1;
+  }
+  .label {
+    font-size: var(--web-small-size);
+    color: var(--text-tertiary);
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3) var(--space-6);
+  }
+</style>

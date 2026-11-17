@@ -1,0 +1,53 @@
+---
+import { ICONS } from "./icons";
+
+interface Props {
+  name: string;
+  size?: "sm" | "md" | "lg";
+  class?: string;
+}
+
+const { name, size = "md", class: className } = Astro.props;
+const def = ICONS[name];
+if (!def) {
+  throw new Error(`Unknown icon: ${name}`);
+}
+
+const attrString = (attrs: Record<string, string>): string =>
+  Object.entries(attrs)
+    .map(([k, v]) => `${k}="${v}"`)
+    .join(" ");
+const markup = def.nodes.map(([tag, attrs]) => `<${tag} ${attrString(attrs)}/>`).join("");
+---
+
+<svg
+  class:list={["icon", `icon-${size}`, className]}
+  viewBox={def.viewBox}
+  fill={def.filled ? "currentColor" : "none"}
+  stroke={def.filled ? "none" : "currentColor"}
+  stroke-width="1.75"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  focusable="false"
+  set:html={markup}
+/>
+
+<style>
+  .icon {
+    flex: none;
+    display: inline-block;
+  }
+  .icon-sm {
+    inline-size: var(--web-icon-sm);
+    block-size: var(--web-icon-sm);
+  }
+  .icon-md {
+    inline-size: var(--web-icon-md);
+    block-size: var(--web-icon-md);
+  }
+  .icon-lg {
+    inline-size: var(--web-icon-lg);
+    block-size: var(--web-icon-lg);
+  }
+</style>

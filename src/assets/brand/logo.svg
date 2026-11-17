@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <title>Portolano</title>
+  <!-- "Rotta": one line that climbs and curls into a harbour, forming a P; the dot is the berth.
+       Monochrome: inherits the text colour. Glyph is optically centred in the 512 box. -->
+  <g transform="translate(-20 -2)">
+    <path d="M172 424V196A104 104 0 1 1 276 300" stroke="currentColor" stroke-width="52" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="276" cy="196" r="34" fill="currentColor"/>
+  </g>
+</svg>

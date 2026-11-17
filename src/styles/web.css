@@ -1,0 +1,251 @@
+/* ==========================================================================
+   Web additions to the app design tokens (tokens.css stays an untouched copy).
+   Every size, colour and duration used by a component comes from tokens.css or from here.
+   Breakpoints (media queries cannot read custom properties): 480, 768, 1024, 1280 px.
+   ========================================================================== */
+
+:root {
+  /* ---- Type scale (the app scale of 11-28 px is too small for a page) ---- */
+  --web-display-size: clamp(40px, 6.2vw, 76px);
+  --web-display-weight: 600;
+  --web-display-leading: 1.05;
+  --web-display-tracking: -0.02em;
+
+  --web-h2-size: clamp(28px, 3.6vw, 44px);
+  --web-h2-weight: 600;
+  --web-h2-leading: 1.15;
+
+  --web-h3-size: 20px;
+  --web-h3-weight: 600;
+  --web-h3-leading: 1.3;
+
+  --web-lead-size: clamp(17px, 1.6vw, 21px);
+  --web-lead-leading: 1.5;
+  --web-lead-color: var(--text-secondary);
+
+  --web-body-size: 16px;
+  --web-body-leading: 1.6;
+
+  --web-small-size: 13px;
+  --web-small-leading: 1.5;
+
+  --web-eyebrow-size: 12px;
+  --web-eyebrow-tracking: 0.08em;
+  --web-eyebrow-color: var(--text-tertiary);
+
+  --web-stat-size: clamp(36px, 5vw, 56px);
+
+  /* ---- Window frame ----------------------------------------------------- */
+  --radius-window: 12px;
+  --web-titlebar-h: 36px;
+  --web-dot-size: 12px;
+  --web-dot-color: var(--border-strong);
+
+  /* ---- Layout ----------------------------------------------------------- */
+  --web-container: 1120px;
+  --web-container-narrow: 720px;
+  --web-gutter: 24px;
+  --web-section-y: clamp(88px, 12vw, 160px);
+  --web-nav-h: 56px;
+  --web-hero-min-h: 100svh;
+  --web-hero-window-w: min(960px, 100%);
+
+  /* ---- Extra spacing (the app scale stops at 48 px) --------------------- */
+  --web-space-14: 56px;
+  --web-space-16: 64px;
+  --web-space-20: 80px;
+
+  /* ---- Buttons ---------------------------------------------------------- */
+  --web-button-h-lg: 44px;
+  --web-button-h: 36px;
+  --web-button-weight: 500;
+  --web-button-pad-lg: 20px;
+  --web-button-pad: 14px;
+
+  /* ---- Icons ------------------------------------------------------------ */
+  --web-icon-sm: 16px;
+  --web-icon-md: 20px;
+  --web-icon-lg: 28px;
+  --web-icon-stroke: 1.75;
+  --web-logo-size: 24px;
+
+  /* ---- Motion (used from S2 on; defined here so durations never live in components) ---- */
+  --web-duration-reveal: 600ms;
+  --web-duration-trace: 1000ms;
+  --web-duration-intro: 2400ms;
+  --web-duration-fade: 200ms;
+
+  /* ---- Decoration ------------------------------------------------------- */
+  --web-bearing-size: 17px;
+  --web-hero-compass-size: max(100%, 100vmin);
+}
+
+@media (max-width: 479px) {
+  :root {
+    --web-gutter: 16px;
+  }
+}
+
+/* Reduced motion: web durations collapse like the app's own duration tokens. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --web-duration-reveal: 1ms;
+    --web-duration-trace: 1ms;
+    --web-duration-intro: 1ms;
+    --web-duration-fade: 1ms;
+  }
+}
+
+/* ---- Base ---------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font-sans);
+  font-size: var(--web-body-size);
+  line-height: var(--web-body-leading);
+  background: var(--surface-content);
+  color: var(--text-primary);
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: var(--web-nav-h);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--surface-content);
+  color: var(--text-primary);
+  font-size: var(--web-body-size);
+  line-height: var(--web-body-leading);
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+blockquote,
+ul,
+ol,
+dl,
+dd {
+  margin: 0;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+img,
+svg,
+picture {
+  display: block;
+  max-inline-size: 100%;
+}
+
+a {
+  color: var(--text-link);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+::selection {
+  background: var(--text-selection-bg);
+}
+
+:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.container {
+  inline-size: 100%;
+  max-inline-size: calc(var(--web-container) + 2 * var(--web-gutter));
+  margin-inline: auto;
+  padding-inline: var(--web-gutter);
+}
+
+.visually-hidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---- Type helpers --------------------------------------------------------- */
+.t-display {
+  font-size: var(--web-display-size);
+  font-weight: var(--web-display-weight);
+  line-height: var(--web-display-leading);
+  letter-spacing: var(--web-display-tracking);
+  text-wrap: balance;
+}
+
+.t-h2 {
+  font-size: var(--web-h2-size);
+  font-weight: var(--web-h2-weight);
+  line-height: var(--web-h2-leading);
+  text-wrap: balance;
+}
+
+.t-h3 {
+  font-size: var(--web-h3-size);
+  font-weight: var(--web-h3-weight);
+  line-height: var(--web-h3-leading);
+}
+
+.t-lead {
+  font-size: var(--web-lead-size);
+  line-height: var(--web-lead-leading);
+  color: var(--web-lead-color);
+  text-wrap: pretty;
+}
+
+.t-small {
+  font-size: var(--web-small-size);
+  line-height: var(--web-small-leading);
+}
+
+.t-mono {
+  font-family: var(--font-mono);
+}
+
+/* ---- Component metrics used by the page components ------------------------ */
+:root {
+  --web-hairline: 1px;
+  /* Share of --text-primary mixed into protocol colours when they are used as text (AA contrast in the light theme). */
+  --web-protocol-text-mix: 30%;
+  --web-measure: 62ch;
+  --web-measure-narrow: 46ch;
+  --web-showcase-max: 1000px;
+  --web-hero-peek: clamp(220px, 34vw, 440px);
+  --web-hero-top: calc(var(--web-nav-h) + clamp(48px, 9vw, 112px));
+  --web-nav-line-range: 48px;
+  --web-icon-plate: 40px;
+  --web-pilot-dot: 10px;
+  --web-pilot-row-gap: 28px;
+  --web-pilot-port-w: 5ch;
+  --web-pilot-proto-w: 4ch;
+  --web-card-pad: 24px;
+  --web-stat-gap: clamp(32px, 7vw, 96px);
+  --web-code-size: 13px;
+}

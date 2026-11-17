@@ -1,0 +1,81 @@
+---
+// One app screenshot in both themes, through the image pipeline (AVIF/WebP with PNG fallback,
+// declared dimensions, lazy loading). Both versions are in the HTML; CSS shows the one matching the
+// system theme or the data-theme attribute. Browsers do not fetch lazy images that are not displayed.
+import { Picture } from "astro:assets";
+
+interface Props {
+  id: string;
+  alt: string;
+  sizes: string;
+}
+const { id, alt, sizes } = Astro.props;
+
+const images = import.meta.glob<{ default: ImageMetadata }>("../assets/screens/*.png", { eager: true });
+const load = (theme: "light" | "dark"): ImageMetadata => {
+  const entry = images[`../assets/screens/${id}-${theme}.png`];
+  if (!entry) throw new Error(`Missing screenshot: ${id}-${theme}.png`);
+  return entry.default;
+};
+const light = load("light");
+const dark = load("dark");
+const widths = [800, 1280, 1920, 2560];
+---
+
+<div class="screen">
+  <Picture
+    pictureAttributes={{ class: "shot-light" }}
+    src={light}
+    alt={alt}
+    formats={["avif", "webp"]}
+    fallbackFormat="png"
+    widths={widths}
+    sizes={sizes}
+    loading="lazy"
+    decoding="async"
+  />
+  <Picture
+    pictureAttributes={{ class: "shot-dark" }}
+    src={dark}
+    alt={alt}
+    formats={["avif", "webp"]}
+    fallbackFormat="png"
+    widths={widths}
+    sizes={sizes}
+    loading="lazy"
+    decoding="async"
+  />
+</div>
+
+<style is:global>
+  .screen img {
+    inline-size: 100%;
+    block-size: auto;
+  }
+  .screen picture.shot-dark {
+    display: none;
+  }
+  .screen picture.shot-light {
+    display: block;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .screen picture.shot-dark {
+      display: block;
+    }
+    :root:not([data-theme="light"]) .screen picture.shot-light {
+      display: none;
+    }
+  }
+  :root[data-theme="dark"] .screen picture.shot-dark {
+    display: block;
+  }
+  :root[data-theme="dark"] .screen picture.shot-light {
+    display: none;
+  }
+  :root[data-theme="light"] .screen picture.shot-light {
+    display: block;
+  }
+  :root[data-theme="light"] .screen picture.shot-dark {
+    display: none;
+  }
+</style>

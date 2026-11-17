@@ -1,0 +1,81 @@
+---
+import Logo from "./Logo.astro";
+import { footer, service } from "../content/copy";
+
+interface Props {
+  home?: string;
+}
+const { home = "" } = Astro.props;
+const href = (value: string): string => (value.startsWith("#") ? `${home}${value}` : value);
+---
+
+<footer class="footer">
+  <div class="container inner">
+    <div class="row">
+      <p class="who">
+        <Logo />
+        <span class="brand">{footer.brand}</span>
+        <span class="license">{footer.license}</span>
+      </p>
+      <nav aria-label={service.navLabels.footer}>
+        <ul class="links">
+          {footer.links.map((link) => <li><a href={href(link.href)}>{link.label}</a></li>)}
+        </ul>
+      </nav>
+    </div>
+    <p class="privacy t-small">{footer.privacy}</p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    padding-block: var(--web-space-16);
+    border-top: var(--web-hairline) solid var(--border-hairline);
+    background: var(--surface-content);
+  }
+  .inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+  }
+  .row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+  .who {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+  }
+  .brand {
+    font-weight: var(--font-weight-semibold);
+  }
+  .license {
+    color: var(--text-secondary);
+    font-size: var(--web-small-size);
+  }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-6);
+  }
+  .links a {
+    color: var(--text-secondary);
+    font-size: var(--font-size-lg);
+  }
+  .links a:hover {
+    color: var(--text-primary);
+  }
+  .privacy {
+    color: var(--text-tertiary);
+  }
+  @media (min-width: 768px) {
+    .row {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+  }
+</style>

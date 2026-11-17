@@ -1,0 +1,116 @@
+---
+import Icon from "./Icon.astro";
+import { service } from "../content/copy";
+---
+
+<button
+  type="button"
+  class="theme-toggle"
+  data-label-to-dark={service.themeToggle.toDark}
+  data-label-to-light={service.themeToggle.toLight}
+  aria-label={service.themeToggle.toDark}
+>
+  <span class="when-light"><Icon name="moon" /></span>
+  <span class="when-dark"><Icon name="sun" /></span>
+</button>
+
+<style>
+  .theme-toggle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    inline-size: var(--web-button-h);
+    block-size: var(--web-button-h);
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-control);
+    background: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition:
+      background-color var(--duration-fast) var(--ease-standard),
+      color var(--duration-fast) var(--ease-standard);
+  }
+  .theme-toggle:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+  }
+  .theme-toggle:active {
+    background: var(--surface-pressed);
+  }
+  .theme-toggle span {
+    display: flex;
+  }
+  .when-dark {
+    display: none !important;
+  }
+
+  /* Without JavaScript the button does nothing, so it stays hidden. */
+  :global(html.js) .theme-toggle {
+    display: inline-flex;
+  }
+
+  /* Show the icon of the theme you would switch to, following data-theme or the system. */
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme="light"])) .when-light {
+      display: none !important;
+    }
+    :global(:root:not([data-theme="light"])) .when-dark {
+      display: flex !important;
+    }
+  }
+  :global(:root[data-theme="dark"]) .when-light {
+    display: none !important;
+  }
+  :global(:root[data-theme="dark"]) .when-dark {
+    display: flex !important;
+  }
+  :global(:root[data-theme="light"]) .when-light {
+    display: flex !important;
+  }
+  :global(:root[data-theme="light"]) .when-dark {
+    display: none !important;
+  }
+</style>
+
+<script>
+  const STORAGE_KEY = "portolano-theme";
+  const root = document.documentElement;
+  const darkQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+  const effectiveTheme = (): "light" | "dark" => {
+    const forced = root.getAttribute("data-theme");
+    if (forced === "light" || forced === "dark") return forced;
+    return darkQuery.matches ? "dark" : "light";
+  };
+
+  const rememberChoice = (theme: "light" | "dark"): void => {
+    try {
+      localStorage.setItem(STORAGE_KEY, theme);
+    } catch (error) {
+      // Storage can be blocked (private mode, site data disabled): the choice then lasts for this visit only.
+      root.dataset.themeStorage = error instanceof Error ? error.name : "unavailable";
+    }
+  };
+
+  const toggles = document.querySelectorAll<HTMLButtonElement>(".theme-toggle");
+
+  const refresh = (): void => {
+    const theme = effectiveTheme();
+    toggles.forEach((button) => {
+      const label = theme === "dark" ? button.dataset.labelToLight : button.dataset.labelToDark;
+      if (label) button.setAttribute("aria-label", label);
+    });
+  };
+
+  toggles.forEach((button) => {
+    button.addEventListener("click", () => {
+      const next = effectiveTheme() === "dark" ? "light" : "dark";
+      root.setAttribute("data-theme", next);
+      rememberChoice(next);
+      refresh();
+    });
+  });
+  darkQuery.addEventListener("change", refresh);
+  refresh();
+</script>

@@ -1,0 +1,38 @@
+---
+// Window chrome for the app screenshots: title bar with three grey dots, no colour.
+---
+
+<div class="frame">
+  <div class="bar" aria-hidden="true">
+    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+  </div>
+  <div class="body"><slot /></div>
+</div>
+
+<style>
+  .frame {
+    border-radius: var(--radius-window);
+    background: var(--surface-window);
+    box-shadow: var(--shadow-dialog);
+    overflow: hidden;
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    block-size: var(--web-titlebar-h);
+    padding-inline: var(--space-4);
+    background: var(--surface-window);
+    border-bottom: var(--web-hairline) solid var(--border-hairline);
+  }
+  .dot {
+    inline-size: var(--web-dot-size);
+    block-size: var(--web-dot-size);
+    border-radius: var(--radius-full);
+    background: var(--web-dot-color);
+  }
+  .body {
+    display: block;
+    line-height: 0;
+  }
+</style>

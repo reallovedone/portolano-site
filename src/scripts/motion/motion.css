@@ -1,0 +1,84 @@
+/* ==========================================================================
+   Section motion (package S4). Tokens, scroll reveal and the one-off tracing of the corner rose.
+   Pre-animation (hidden) states exist only once the motion script is running (html.motion-ready), without reduced motion and
+   on screen; `html.motion-off` (set by the script if a part fails) removes them all.
+   Only transform, opacity and stroke-dashoffset animate.
+   ========================================================================== */
+
+:root {
+  --motion-rise: 16px;
+  --motion-stagger: 60ms;
+  --motion-count: 900ms;
+
+  /* Corner rose tracing (plan 4.4): network, then rings and winds, then the points. */
+  --trace-ring-delay: 250ms;
+  --trace-wind-delay: 400ms;
+  --trace-node-delay: 700ms;
+  --trace-node-dur: 300ms;
+
+  /* Showcase (plan 3.5) */
+  --showcase-advance: 6000ms;
+  --showcase-indicator-h: 2px;
+
+  /* Pilot sheet (plan 4.3): one row every step; the connector reaches the next dot as it appears. */
+  --pilot-step: 700ms;
+  --pilot-row-dur: 500ms;
+  --pilot-link-delay: 100ms;
+  --pilot-part-delay: 90ms;
+}
+
+@media screen and (prefers-reduced-motion: no-preference) {
+  /* ---- Scroll reveal ---------------------------------------------------- */
+  html.motion-ready:not(.motion-off) :is([data-reveal-children] > :not([data-reveal-items]), [data-reveal-items] > *, #download > .inner > *):not(.is-in) {
+    opacity: 0;
+    transform: translateY(var(--motion-rise));
+  }
+  html.motion-ready:not(.motion-off) :is([data-reveal-children] > :not([data-reveal-items]), [data-reveal-items] > *, #download > .inner > *).is-in {
+    transition:
+      opacity var(--web-duration-reveal) var(--ease-out) var(--reveal-delay, 0ms),
+      transform var(--web-duration-reveal) var(--ease-out) var(--reveal-delay, 0ms);
+  }
+
+  /* ---- Corner rose: traced once when it enters view ---------------------- */
+  html.motion-ready:not(.motion-off) [data-trace]:not(.is-done) :is(.net, .ring, .wind) {
+    vector-effect: none;
+    stroke-width: var(--trace-u, 1px);
+    stroke-dasharray: 1 2;
+    stroke-dashoffset: 1;
+  }
+  html.motion-ready:not(.motion-off) [data-trace]:not(.is-done) .node {
+    opacity: 0;
+  }
+
+  @keyframes motion-trace {
+    from {
+      stroke-dasharray: 1 2;
+      stroke-dashoffset: 1;
+    }
+    to {
+      stroke-dasharray: 1 2;
+      stroke-dashoffset: 0;
+    }
+  }
+  @keyframes motion-appear {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  html.motion-ready:not(.motion-off) [data-trace].is-tracing:not(.is-done) .net {
+    animation: motion-trace var(--web-duration-trace) var(--ease-out) both;
+  }
+  html.motion-ready:not(.motion-off) [data-trace].is-tracing:not(.is-done) .ring {
+    animation: motion-trace var(--web-duration-trace) var(--ease-out) var(--trace-ring-delay) both;
+  }
+  html.motion-ready:not(.motion-off) [data-trace].is-tracing:not(.is-done) .wind {
+    animation: motion-trace var(--web-duration-trace) var(--ease-out) var(--trace-wind-delay) both;
+  }
+  html.motion-ready:not(.motion-off) [data-trace].is-tracing:not(.is-done) .node {
+    animation: motion-appear var(--trace-node-dur) var(--ease-out) var(--trace-node-delay) both;
+  }
+}

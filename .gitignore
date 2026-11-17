@@ -1,0 +1,14 @@
+# Working notes kept on the maintainer's machine, not part of the repository
+PIANO_SITO.md
+
+# Local scratch space (screenshot tooling, temporary files)
+.tmp/
+
+# Node
+node_modules/
+dist/
+.astro/
+
+# OS / editors
+.DS_Store
+.claude/

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Portolano social image</title>
+<style>
+  /* Literal values are allowed here: this file is rendered once into public/og.png, not shipped.
+     They are the DARK theme tokens of src/styles/tokens.css. */
+  :root {
+    --surface-content: #1e1f22;
+    --text-primary: #f2f2f5;
+    --text-secondary: #b9bbc3;
+    --decor-line: rgb(255 255 255 / 6%);
+    --decor-line-strong: rgb(255 255 255 / 12%);
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1200px; height: 630px; overflow: hidden; background: var(--surface-content); }
+  body { position: relative; font-family: var(--font-sans); color: var(--text-primary); }
+  .rose { position: absolute; right: -110px; top: -140px; width: 900px; height: 900px; }
+  .rose svg { width: 100%; height: 100%; overflow: visible; }
+  .net { stroke: var(--decor-line-strong); stroke-width: 1; fill: none; }
+  .ring, .wind { stroke: var(--decor-line-strong); stroke-width: 1.5; fill: none; }
+  .node { fill: var(--text-secondary); opacity: 0.55; }
+  .bearing { fill: var(--text-secondary); opacity: 0.6; font: 500 17px ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+  .brand { position: absolute; left: 80px; top: 72px; display: flex; align-items: center; gap: 16px; font-size: 34px; font-weight: 600; }
+  .brand svg { width: 52px; height: 52px; }
+  h1 { position: absolute; left: 80px; bottom: 84px; width: 760px; font-size: 84px; font-weight: 600; line-height: 1.05; letter-spacing: -0.02em; }
+</style>
+</head>
+<body>
+  <div class="rose" aria-hidden="true">
+    <svg viewBox="-500 -500 1000 1000" id="rose"></svg>
+  </div>
+  <div class="brand">
+    <svg viewBox="0 0 512 512" fill="none" aria-hidden="true">
+      <g transform="translate(-20 -2)">
+        <path d="M172 424V196A104 104 0 1 1 276 300" stroke="currentColor" stroke-width="52" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="276" cy="196" r="34" fill="currentColor"/>
+      </g>
+    </svg>
+    <span>Portolano</span>
+  </div>
+  <h1>One window for every remote connection.</h1>
+  <script>
+    // Same geometry as src/components/hero/Compass.astro: 16 points on a circle of radius 420,
+    // every pair joined, two rings, eight principal winds, five port bearings.
+    (function () {
+      var R = 420, N = 16, NS = "http://www.w3.org/2000/svg";
+      var svg = document.getElementById("rose");
+      var pts = [];
+      for (var i = 0; i < N; i++) {
+        var a = (i / N) * Math.PI * 2 - Math.PI / 2;
+        pts.push({ x: Math.cos(a) * R, y: Math.sin(a) * R, a: a });
+      }
+      function el(tag, attrs, text) {
+        var e = document.createElementNS(NS, tag);
+        for (var k in attrs) e.setAttribute(k, attrs[k]);
+        if (text) e.textContent = text;
+        svg.appendChild(e);
+      }
+      var d = "";
+      for (var p = 0; p < N; p++) for (var q = p + 1; q < N; q++)
+        d += "M" + pts[p].x + " " + pts[p].y + "L" + pts[q].x + " " + pts[q].y;
+      el("path", { class: "net", d: d, "vector-effect": "non-scaling-stroke" });
+      el("circle", { class: "ring", r: R });
+      el("circle", { class: "ring", r: R / 2 });
+      var w = "";
+      for (var i2 = 0; i2 < N; i2 += 2) w += "M0 0L" + pts[i2].x + " " + pts[i2].y;
+      el("path", { class: "wind", d: w });
+      pts.forEach(function (pt, i3) { el("circle", { class: "node", cx: pt.x, cy: pt.y, r: i3 % 2 === 0 ? 5 : 3 }); });
+      el("circle", { class: "node", r: 6 });
+      [[1, "22"], [4, "443"], [7, "3389"], [10, "5900"], [13, "23"]].forEach(function (b) {
+        var pt = pts[b[0]];
+        el("text", { class: "bearing", x: Math.cos(pt.a) * (R + 34), y: Math.sin(pt.a) * (R + 34), "text-anchor": "middle", "dominant-baseline": "middle" }, b[1]);
+      });
+    })();
+  </script>
+</body>
+</html>
