@@ -51,6 +51,7 @@
   --web-hero-window-w: min(960px, 100%);
 
   /* ---- Extra spacing (the app scale stops at 48 px) --------------------- */
+  --web-space-10: 40px;
   --web-space-14: 56px;
   --web-space-16: 64px;
   --web-space-20: 80px;
@@ -93,6 +94,7 @@
     --web-duration-trace: 1ms;
     --web-duration-intro: 1ms;
     --web-duration-fade: 1ms;
+    --web-card-route-trace: 1ms;
   }
 }
 
@@ -248,4 +250,33 @@ a:hover {
   --web-card-pad: 24px;
   --web-stat-gap: clamp(32px, 7vw, 96px);
   --web-code-size: 13px;
+
+  /* ---- Terminal demo ---- */
+  --web-terminal-max: 760px;
+  --web-terminal-size: 13px;
+  --web-terminal-leading: 1.6;
+  --web-terminal-tab-mark: 2px;
+  --web-terminal-cursor-w: 0.6em;
+  --web-terminal-cursor-h: 1.2em;
+  --web-terminal-gap: var(--space-4);
+  /* Playback (read by src/scripts/motion/terminal.ts): start delay, per-character typing step, pause before each next line. */
+  --web-terminal-start: 400ms;
+  --web-terminal-type-step: 45ms;
+  --web-terminal-line-pause: 320ms;
+  --web-terminal-blink: 1100ms;
+
+  /* ---- Protocol card route ---- */
+  --web-card-route-dot: 5px;
+  --web-card-route-trace: 700ms;
+
+  /* ---- Roadmap ---- */
+  --web-roadmap-node: 12px;
+  --web-roadmap-gap: var(--web-space-10);
+  --web-roadmap-dash: 6px;
+  --web-roadmap-dash-gap: 5px;
+  --web-roadmap-line: var(--web-hairline);
+
+  /* ---- FAQ ---- */
+  --web-faq-max: 760px;
+  --web-tap-min: 48px;
 }

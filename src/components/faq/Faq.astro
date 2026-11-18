@@ -1,0 +1,82 @@
+---
+// FAQ: native <details>/<summary>, no JavaScript. Words listed in an item's `links` become links
+// (the copy strings stay plain text). The matching FAQPage JSON-LD is built in lib/seo.ts.
+import Icon from "../Icon.astro";
+import Section from "../Section.astro";
+import { faq } from "../../content/copy";
+import { linkify } from "../../lib/linkify";
+---
+
+<Section id="faq" tone="window" titleId="faq-title" eyebrow={faq.eyebrow} title={faq.title}>
+  <div class="faq">
+    {
+      faq.items.map((item) => (
+        <details class="item">
+          <summary class="question">
+            <span class="q">{item.q}</span>
+            <Icon name="chevron" class="chevron" />
+          </summary>
+          <p class="answer">
+            {linkify(item.a, item.links).map((part) => (typeof part === "string" ? part : <a href={part.href}>{part.text}</a>))}
+          </p>
+        </details>
+      ))
+    }
+  </div>
+</Section>
+
+<style>
+  .faq {
+    inline-size: 100%;
+    max-inline-size: var(--web-faq-max);
+    border-block-start: var(--web-hairline) solid var(--border-hairline);
+  }
+  .item {
+    border-block-end: var(--web-hairline) solid var(--border-hairline);
+  }
+  .question {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    min-block-size: var(--web-tap-min);
+    padding-block: var(--space-4);
+    cursor: pointer;
+    list-style: none;
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-normal);
+  }
+  .question::-webkit-details-marker {
+    display: none;
+  }
+  .q {
+    text-wrap: balance;
+  }
+  .question :global(.chevron) {
+    color: var(--text-secondary);
+    transition: transform var(--duration-slow) var(--ease-standard);
+  }
+  .item[open] .question :global(.chevron) {
+    transform: rotate(180deg);
+  }
+  .question:hover :global(.chevron) {
+    color: var(--text-primary);
+  }
+  .answer {
+    max-inline-size: var(--web-measure);
+    padding-block-end: var(--space-5);
+    color: var(--text-secondary);
+    font-size: var(--font-size-lg);
+    line-height: var(--line-height-relaxed);
+  }
+  .answer a {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .question :global(.chevron) {
+      transition: none;
+    }
+  }
+</style>

@@ -13,6 +13,7 @@ const { kind, name, port, text, class: className } = Astro.props;
 ---
 
 <article class:list={["card", `kind-${kind}`, className]}>
+  <span class="route" aria-hidden="true"><span class="route-dot"></span></span>
   <span class="kind-icon"><Icon name={kind} size="lg" /></span>
   <h3 class="t-h3">{name}</h3>
   <p class="port">{port}</p>
@@ -21,6 +22,7 @@ const { kind, name, port, text, class: className } = Astro.props;
 
 <style>
   .card {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
@@ -32,6 +34,68 @@ const { kind, name, port, text, class: className } = Astro.props;
   }
   .card:hover {
     border-color: var(--border-strong);
+  }
+  /* Hairline route along the top edge, traced on hover / focus-within; a small dot travels it.
+     The dot's carrier is as wide as the track and slides by its own width (transform only). */
+  .route {
+    position: absolute;
+    inset-inline: var(--radius-panel);
+    inset-block-start: calc(var(--web-hairline) * -1);
+    block-size: var(--web-hairline);
+    pointer-events: none;
+  }
+  .route::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--protocol-color);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--web-card-route-trace) var(--ease-out);
+  }
+  .route-dot {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  .route-dot::after {
+    content: "";
+    position: absolute;
+    inset-inline-end: 0;
+    inset-block-start: calc(50% - var(--web-card-route-dot) / 2);
+    inline-size: var(--web-card-route-dot);
+    block-size: var(--web-card-route-dot);
+    border-radius: var(--radius-full);
+    background: var(--protocol-color);
+  }
+  .card:is(:hover, :focus-within) .route::before {
+    transform: scaleX(1);
+  }
+  .card:is(:hover, :focus-within) .route-dot {
+    animation: card-route-dot var(--web-card-route-trace) var(--ease-out) both;
+  }
+  @keyframes card-route-dot {
+    from {
+      opacity: 1;
+      transform: translateX(-100%);
+    }
+    85% {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+      transform: translateX(0);
+    }
+  }
+  /* Reduced motion: the line is simply there, no travelling dot. */
+  @media (prefers-reduced-motion: reduce) {
+    .route::before {
+      transition: none;
+    }
+    .card:is(:hover, :focus-within) .route-dot {
+      animation: none;
+    }
   }
   .kind-icon {
     display: flex;

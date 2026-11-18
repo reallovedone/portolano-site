@@ -1,0 +1,129 @@
+---
+// Terminal demo (features section): a scripted SSH session in a window frame.
+// The final state is the static HTML (full text, solid cursor). src/scripts/motion/terminal.ts replays
+// it when it enters view (lines appear, commands are typed) and then lets the cursor blink; nothing
+// changes size, because every line is in the markup from the start.
+// The visual terminal is aria-hidden; screen readers get the srText description instead.
+import Icon from "../Icon.astro";
+import WindowFrame from "../WindowFrame.astro";
+import { terminalDemo } from "../../content/copy";
+
+const lastCommand = terminalDemo.lines.map((line) => line.kind).lastIndexOf("command");
+---
+
+<figure class="terminal" data-terminal>
+  <WindowFrame>
+    <div class="term" aria-hidden="true">
+      <div class="tabs">
+        <span class="tab"><Icon name="ssh" size="sm" class="tab-icon" />{terminalDemo.tab}</span>
+      </div>
+      <div class="screen">
+        {
+          terminalDemo.lines.map((line, i) => (
+            <div class={`line line-${line.kind}`} data-term-line={line.kind}>
+              {line.kind === "command" && <span class="prompt">{line.prompt}</span>}
+              {line.kind === "command" ? (
+                <span class="cmd" data-text={line.text}>{line.text}</span>
+              ) : (
+                line.text
+              )}
+              {i === lastCommand && <span class="cursor" data-cursor />}
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </WindowFrame>
+  <p class="visually-hidden">{terminalDemo.srText}</p>
+  <figcaption class="caption">{terminalDemo.caption}</figcaption>
+</figure>
+
+<style>
+  .terminal {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    inline-size: 100%;
+    max-inline-size: var(--web-terminal-max);
+    margin-inline: auto;
+  }
+  .term {
+    background: var(--terminal-bg);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: var(--web-terminal-size);
+    line-height: var(--web-terminal-leading);
+  }
+  .tabs {
+    display: flex;
+    background: var(--surface-window);
+    border-block-end: var(--web-hairline) solid var(--border-hairline);
+  }
+  .tab {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    background: var(--terminal-bg);
+    color: var(--text-primary);
+    border-inline-end: var(--web-hairline) solid var(--border-hairline);
+  }
+  .tab::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    inset-block-start: 0;
+    block-size: var(--web-terminal-tab-mark);
+    background: var(--protocol-ssh);
+  }
+  .tab :global(.tab-icon) {
+    color: var(--protocol-ssh);
+  }
+  .screen {
+    padding: var(--web-terminal-gap);
+    overflow-x: auto;
+  }
+  .line {
+    display: flex;
+    align-items: center;
+    min-inline-size: max-content;
+    min-block-size: 1lh;
+    white-space: pre;
+  }
+  .line-status {
+    color: var(--ansi-bright-black);
+  }
+  .prompt {
+    margin-inline-end: 1ch;
+    color: var(--ansi-green);
+  }
+  .cursor {
+    display: inline-block;
+    flex: none;
+    inline-size: var(--web-terminal-cursor-w);
+    block-size: var(--web-terminal-cursor-h);
+    margin-inline-start: 1px;
+    background: var(--text-primary);
+  }
+  .caption {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: var(--font-size-lg);
+  }
+
+  /* Playback states (set by terminal.ts). Hidden lines keep their space: opacity only. */
+  @media screen and (prefers-reduced-motion: no-preference) {
+    :global(html.motion-ready:not(.motion-off)) .terminal.is-pending .line:not(.is-shown) {
+      opacity: 0;
+    }
+    :global(html.motion-ready:not(.motion-off)) .terminal.is-idle .cursor {
+      animation: terminal-blink var(--web-terminal-blink) steps(1, end) infinite;
+    }
+    @keyframes terminal-blink {
+      50% {
+        opacity: 0;
+      }
+    }
+  }
+</style>

@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { meta } from "../content/copy";
+import { faq, meta } from "../content/copy";
 import {
   absoluteUrl,
+  buildFaqPage,
   buildRobots,
   buildSitemap,
   buildSoftwareApplication,
@@ -43,6 +44,21 @@ describe("buildSoftwareApplication", () => {
 
   it("escapes angle brackets", () => {
     expect(serializeJsonLd({ a: "</script>" })).not.toContain("</script>");
+  });
+});
+
+describe("buildFaqPage", () => {
+  const data = buildFaqPage(faq.items);
+
+  it("has one question per FAQ item with the exact visible text", () => {
+    const parsed = JSON.parse(serializeJsonLd(data));
+    expect(parsed["@type"]).toBe("FAQPage");
+    expect(parsed.mainEntity).toHaveLength(faq.items.length);
+    faq.items.forEach((item, i) => {
+      expect(parsed.mainEntity[i]["@type"]).toBe("Question");
+      expect(parsed.mainEntity[i].name).toBe(item.q);
+      expect(parsed.mainEntity[i].acceptedAnswer).toEqual({ "@type": "Answer", text: item.a });
+    });
   });
 });
 

@@ -1,0 +1,142 @@
+---
+// Roadmap: a chart route running left to right (top to bottom on narrow screens). One port per stop,
+// joined by a dashed rhumb line; the last stop is an open, still-to-be-charted end where the line
+// continues and fades. The ordered list is the whole content; the line and nodes are CSS only.
+// The segments trace in when each item is revealed (the `is-in` class from reveal.ts); without
+// the motion script, or with reduced motion, everything is simply drawn.
+import Button from "../Button.astro";
+import Section from "../Section.astro";
+import { REPO_URL, roadmap } from "../../content/copy";
+---
+
+<Section id="roadmap" tone="content" titleId="roadmap-title" eyebrow={roadmap.eyebrow} title={roadmap.title}>
+  <ol class="route" role="list" data-reveal-items>
+    {
+      roadmap.stops.map((stop) => (
+        <li class="stop">
+          <span class="node" aria-hidden="true"></span>
+          <h3 class="t-h3">{stop.title}</h3>
+          <p class="text">{stop.text}</p>
+        </li>
+      ))
+    }
+    <li class="stop stop-last">
+      <span class="node" aria-hidden="true"></span>
+      <h3 class="t-h3">{roadmap.last.title}</h3>
+      <p class="text">{roadmap.last.text}</p>
+      <Button href={REPO_URL} variant="text">{roadmap.last.link}</Button>
+    </li>
+  </ol>
+</Section>
+
+<style>
+  .route {
+    display: flex;
+    flex-direction: column;
+    gap: var(--web-roadmap-gap);
+  }
+  .stop {
+    /* Height of the title's first line: the node and the line sit on its middle. */
+    --roadmap-row: calc(var(--web-h3-size) * var(--web-h3-leading));
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+    padding-inline-start: calc(var(--web-roadmap-node) + var(--space-5));
+  }
+  .text {
+    max-inline-size: var(--web-measure-narrow);
+    color: var(--text-secondary);
+    font-size: var(--font-size-lg);
+    line-height: var(--line-height-relaxed);
+  }
+
+  /* Port: node dot on the line. */
+  .node {
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block-start: calc((var(--roadmap-row) - var(--web-roadmap-node)) / 2);
+    z-index: 1;
+    inline-size: var(--web-roadmap-node);
+    block-size: var(--web-roadmap-node);
+    border-radius: var(--radius-full);
+    background: var(--text-secondary);
+    box-shadow: 0 0 0 var(--space-1) var(--surface-content);
+  }
+  /* The end of the chart: an open circle, not yet charted. */
+  .stop-last .node {
+    background: var(--surface-content);
+    border: var(--web-hairline) dashed var(--text-secondary);
+  }
+
+  /* Rhumb line segment from this node to the next one (dashed). */
+  .stop::before {
+    content: "";
+    position: absolute;
+    inset-inline-start: calc(var(--web-roadmap-node) / 2 - var(--web-roadmap-line) / 2);
+    inset-block-start: calc(var(--roadmap-row) / 2);
+    inset-block-end: calc(-1 * (var(--web-roadmap-gap) + var(--roadmap-row) / 2));
+    inline-size: var(--web-roadmap-line);
+    background: repeating-linear-gradient(
+      to bottom,
+      var(--text-tertiary) 0 var(--web-roadmap-dash),
+      transparent var(--web-roadmap-dash) calc(var(--web-roadmap-dash) + var(--web-roadmap-dash-gap))
+    );
+    transform-origin: top;
+  }
+  /* Past the last port the line keeps going and fades out. */
+  .stop-last::before {
+    inset-block-end: calc(-1 * var(--web-roadmap-gap));
+    mask-image: linear-gradient(to bottom, black, transparent);
+  }
+
+  @media (min-width: 768px) {
+    .route {
+      flex-direction: row;
+      gap: var(--web-roadmap-gap);
+    }
+    .stop {
+      flex: 1 1 0;
+      min-inline-size: 0;
+      padding-inline-start: 0;
+      padding-block-start: calc(var(--web-roadmap-node) + var(--space-5));
+    }
+    .node {
+      inset-block-start: 0;
+    }
+    .stop::before {
+      inset-inline-start: calc(var(--web-roadmap-node) / 2);
+      inset-inline-end: calc(-1 * (var(--web-roadmap-gap) + var(--web-roadmap-node) / 2));
+      inset-block-start: calc(var(--web-roadmap-node) / 2 - var(--web-roadmap-line) / 2);
+      inset-block-end: auto;
+      inline-size: auto;
+      block-size: var(--web-roadmap-line);
+      background: repeating-linear-gradient(
+        to right,
+        var(--text-tertiary) 0 var(--web-roadmap-dash),
+        transparent var(--web-roadmap-dash) calc(var(--web-roadmap-dash) + var(--web-roadmap-dash-gap))
+      );
+      transform-origin: left;
+    }
+    .stop-last::before {
+      inset-inline-end: 0;
+      mask-image: linear-gradient(to right, black, transparent);
+    }
+  }
+
+  /* Tracing in: the segment draws as its item is revealed. */
+  @media screen and (prefers-reduced-motion: no-preference) {
+    :global(html.motion-ready:not(.motion-off)) .stop:not(.is-in)::before {
+      transform: scaleY(0);
+    }
+    :global(html.motion-ready:not(.motion-off)) .stop.is-in::before {
+      transition: transform var(--web-duration-trace) var(--ease-out) calc(var(--reveal-delay, 0ms) + var(--web-duration-reveal) / 2);
+    }
+  }
+  @media screen and (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    :global(html.motion-ready:not(.motion-off)) .stop:not(.is-in)::before {
+      transform: scaleX(0);
+    }
+  }
+</style>

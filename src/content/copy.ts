@@ -203,6 +203,93 @@ export const security = {
   },
 };
 
+/** Terminal demo in the features section: a scripted SSH session, generic names only. */
+export const terminalDemo = {
+  tab: "bastion",
+  caption: "A real terminal, one click away from the tree.",
+  srText: "An SSH session to a host named bastion: the uptime and disk usage commands and their output.",
+  lines: [
+    { kind: "status", text: "Connected to bastion · host key verified" },
+    { kind: "command", prompt: "deploy@bastion:~$", text: "uptime" },
+    { kind: "output", text: " 10:42:07 up 41 days,  3:12,  2 users,  load average: 0.12, 0.08, 0.05" },
+    { kind: "command", prompt: "deploy@bastion:~$", text: "df -h /srv" },
+    { kind: "output", text: "Filesystem      Size  Used Avail Use% Mounted on" },
+    { kind: "output", text: "/dev/sda2       200G   61G  139G  31% /srv" },
+    { kind: "command", prompt: "deploy@bastion:~$", text: "" },
+  ] as Array<{ kind: "status" | "command" | "output"; text: string; prompt?: string }>,
+};
+
+export const roadmap = {
+  eyebrow: "THE ROUTE AHEAD",
+  title: "Where the route goes next.",
+  stops: [
+    {
+      title: "Signed builds.",
+      text: "No more warnings from macOS and Windows the first time you open Portolano.",
+    },
+    {
+      title: "Sync.",
+      text: "The same connection tree on every computer you use.",
+    },
+  ],
+  last: {
+    title: "Stay connected.",
+    text: "Watch the repository on GitHub to hear about every new release.",
+    link: "Watch on GitHub →",
+  },
+};
+
+/** A word of an FAQ answer that is rendered as a link (first occurrence only). */
+export interface FaqLink {
+  text: string;
+  href: string;
+}
+
+export interface FaqItem {
+  q: string;
+  a: string;
+  links?: FaqLink[];
+}
+
+export const faq: { eyebrow: string; title: string; items: FaqItem[] } = {
+  eyebrow: "QUESTIONS",
+  title: "Before you set sail.",
+  items: [
+    {
+      q: "Is Portolano really free?",
+      a: "Yes. It is open source under the MIT license, with no account and no subscription.",
+    },
+    {
+      q: "Where are my passwords stored?",
+      a: "Only on your computer, in an encrypted vault file in the system's application-data folder. Your master password is never stored, and the vault locks after 15 minutes of inactivity.",
+    },
+    {
+      q: "Why does my system warn me when I open it?",
+      a: "The builds are not code-signed yet, so macOS and Windows warn you the first time. Every release comes with SHA-256 checksums, and signed builds are on the route ahead.",
+    },
+    {
+      q: "How do updates work?",
+      a: "From version 0.2.0, Portolano checks GitHub for a new release and installs it only if you agree, after verifying it with the project's signing key. The automatic check can be turned off.",
+    },
+    {
+      q: "Can I bring my connections from another tool?",
+      a: "Yes: from OpenSSH config, .rdp files, MobaXterm, mRemoteNG and CSV. You see a preview first, and passwords are never imported.",
+    },
+    {
+      q: "Is it ready for production servers?",
+      a: "Portolano is in alpha and has not had an independent security audit. It is developed and tested mainly on macOS; the Windows build has had less testing.",
+    },
+    {
+      q: "How can I report a bug or help?",
+      a: "Open an issue on GitHub; ideas and pull requests are welcome. Report security problems privately, as described in SECURITY.md.",
+      links: [
+        { text: "GitHub", href: ISSUES_URL },
+        { text: "SECURITY.md", href: SECURITY_URL },
+      ],
+    },
+  ],
+};
+
 export const download = {
   eyebrow: "DOWNLOAD",
   title: "Chart a course.",

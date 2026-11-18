@@ -240,41 +240,42 @@ const bearings = BEARINGS.map(([index, port]) => {
     fill: none;
   }
 
-  /* ---- Animated rose: only with JavaScript and without reduced motion ------ */
+  /* ---- Animated rose: only once the hero script is running (html.hero-ready) and without reduced
+     motion. Gating on the script, not on html.js, keeps the strokes visible if it never starts. ---- */
   @media (prefers-reduced-motion: no-preference) {
     /* User-unit hairline: dashes of a traced path are not usable with non-scaling strokes.
        The script keeps --hero-u equal to one screen pixel in user units. */
-    :global(html.js) .animated :is(.net, .ring, .wind, .spoke, .route) {
+    :global(html.hero-ready) .animated :is(.net, .ring, .wind, .spoke, .route) {
       vector-effect: none;
       stroke-width: var(--hero-u, 0.7px);
     }
-    :global(html.js) .animated :is(.node, .bearing) {
+    :global(html.hero-ready) .animated :is(.node, .bearing) {
       transition: fill var(--duration-slow) var(--ease-standard);
     }
-    :global(html.js) .animated .node {
+    :global(html.hero-ready) .animated .node {
       transform-box: fill-box;
       transform-origin: center;
     }
-    :global(html.js) .animated .bearing {
+    :global(html.hero-ready) .animated .bearing {
       transform-box: fill-box;
       transform-origin: center;
     }
-    :global(html.js) .animated .node:global(.lit) {
+    :global(html.hero-ready) .animated .node:global(.lit) {
       fill: var(--decor-text);
     }
-    :global(html.js) .animated .bearing:global(.lit)[data-port="22"] {
+    :global(html.hero-ready) .animated .bearing:global(.lit)[data-port="22"] {
       fill: var(--protocol-ssh);
     }
-    :global(html.js) .animated .bearing:global(.lit)[data-port="3389"] {
+    :global(html.hero-ready) .animated .bearing:global(.lit)[data-port="3389"] {
       fill: var(--protocol-rdp);
     }
-    :global(html.js) .animated .bearing:global(.lit)[data-port="5900"] {
+    :global(html.hero-ready) .animated .bearing:global(.lit)[data-port="5900"] {
       fill: var(--protocol-vnc);
     }
-    :global(html.js) .animated .bearing:global(.lit)[data-port="443"] {
+    :global(html.hero-ready) .animated .bearing:global(.lit)[data-port="443"] {
       fill: var(--protocol-web);
     }
-    :global(html.js) .animated .bearing:global(.lit)[data-port="23"] {
+    :global(html.hero-ready) .animated .bearing:global(.lit)[data-port="23"] {
       fill: var(--protocol-local);
     }
 
@@ -307,25 +308,25 @@ const bearings = BEARINGS.map(([index, port]) => {
       }
     }
 
-    :global(html.js) .animated .node {
+    :global(html.hero-ready) .animated .node {
       animation: pop var(--hero-node-dur) var(--ease-out) calc(var(--i) * var(--hero-node-step)) backwards;
     }
-    :global(html.js) .animated .core {
+    :global(html.hero-ready) .animated .core {
       animation: pop var(--hero-core-dur) var(--ease-out) backwards;
     }
-    :global(html.js) .animated .wind {
+    :global(html.hero-ready) .animated .wind {
       animation: trace var(--hero-wind-dur) var(--ease-out) calc(var(--hero-wind-start) + var(--i) * var(--hero-wind-step)) backwards;
     }
-    :global(html.js) .animated .net {
+    :global(html.hero-ready) .animated .net {
       animation: trace var(--hero-line-dur) var(--ease-out) calc(var(--hero-line-start) + var(--i) * var(--hero-line-step)) backwards;
     }
-    :global(html.js) .animated .ring {
+    :global(html.hero-ready) .animated .ring {
       animation: trace var(--hero-ring-dur) var(--ease-out) var(--hero-ring-start) backwards;
       transform-box: fill-box;
       transform-origin: center;
       rotate: -90deg;
     }
-    :global(html.js) .animated .bearing {
+    :global(html.hero-ready) .animated .bearing {
       animation: appear var(--hero-label-dur) var(--ease-out) calc(var(--hero-label-start) + var(--i) * var(--hero-label-step)) backwards;
     }
   }

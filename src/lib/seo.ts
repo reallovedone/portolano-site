@@ -1,7 +1,7 @@
 // Search and sharing helpers: head metadata values, JSON-LD, sitemap and robots.txt bodies.
 // Pure functions, no I/O, so they can be unit-tested.
 
-import { meta, REPO_URL } from "../content/copy";
+import { meta, REPO_URL, type FaqItem } from "../content/copy";
 import { RELEASES_URL } from "./github";
 
 /**
@@ -52,6 +52,19 @@ export function buildSoftwareApplication({ site, version }: SoftwareApplicationI
     offers: { "@type": "Offer", price: 0, priceCurrency: "USD" },
     image: absoluteUrl(OG_IMAGE.path, site),
     author: { "@type": "Person", name: AUTHOR_NAME },
+  };
+}
+
+/** schema.org FAQPage built from the visible FAQ items (same questions and answers as the page). */
+export function buildFaqPage(items: readonly FaqItem[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: { "@type": "Answer", text: item.a },
+    })),
   };
 }
 

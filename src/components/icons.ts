@@ -52,6 +52,10 @@ export const ICONS: Record<string, IconDef> = {
       p("M3 3v13a2 2 0 0 0 2 2h3"),
     ],
   },
+  chevron: {
+    viewBox: "0 0 24 24",
+    nodes: [p("m6 9 6 6 6-6")],
+  },
   lock: {
     viewBox: "0 0 24 24",
     nodes: [["rect", { width: "18", height: "11", x: "3", y: "11", rx: "2", ry: "2" }], p("M7 11V7a5 5 0 0 1 10 0v4")],

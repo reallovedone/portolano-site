@@ -11,10 +11,11 @@ interface Props {
   canonical?: boolean;
   /** noindex,follow instead of index,follow. */
   noindex?: boolean;
-  /** Structured data object, serialised into an application/ld+json script. */
-  jsonLd?: object;
+  /** Structured data object (or several), each serialised into its own application/ld+json script. */
+  jsonLd?: object | object[];
 }
 const { title = meta.title, description = meta.description, canonical = true, noindex = false, jsonLd } = Astro.props;
+const jsonLdList = jsonLd === undefined ? [] : Array.isArray(jsonLd) ? jsonLd : [jsonLd];
 const site = Astro.site;
 if (!site) throw new Error("astro.config.mjs must set `site`");
 const pageUrl = absoluteUrl(Astro.url.pathname, site);
@@ -51,7 +52,7 @@ const imageUrl = absoluteUrl(OG_IMAGE.path, site);
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={imageUrl} />
     <meta name="twitter:image:alt" content={OG_IMAGE.alt} />
-    {jsonLd && <script type="application/ld+json" set:html={serializeJsonLd(jsonLd)} />}
+    {jsonLdList.map((data) => <script type="application/ld+json" set:html={serializeJsonLd(data)} />)}
     <!-- Applies the saved theme before the first paint to avoid a flash of the wrong one. -->
     <script is:inline>
       (function () {
