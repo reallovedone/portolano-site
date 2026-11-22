@@ -1,5 +1,5 @@
 ---
-// Showcase (plan 3.5). Without JavaScript: the four screenshots stacked in a column, each with its
+// Showcase (plan 3.5). Without JavaScript: the five screenshots stacked in a column, each with its
 // caption (the agreed static state). With the motion script running (html.motion-ready) the same figures become the panels of
 // a tabbed window: tablist above, one panel visible at a time, 200 ms crossfade (tabs.ts wires it).
 import Section from "../Section.astro";
@@ -100,7 +100,7 @@ import { showcase } from "../../content/copy";
     transition: color var(--duration-base) var(--ease-standard);
   }
   @media (max-width: 479px) {
-    /* Phones: smaller text and tighter padding so the four tabs share one row at 375 px (they may wrap below 360 px). */
+    /* Phones: smaller text and tighter padding so the five tabs share one row at 375 px (they may wrap below 360 px). */
     .tab {
       padding-inline: var(--space-2);
       font-size: var(--font-size-md);

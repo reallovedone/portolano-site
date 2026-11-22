@@ -46,7 +46,7 @@ const jsonLd = [buildSoftwareApplication({ site: Astro.site!, version: data.vers
       </div>
     </Section>
 
-    <Section id="features" tone="window" titleId="features-title" eyebrow={features.eyebrow} title={features.title}>
+    <Section id="features" tone="window" titleId="features-title" eyebrow={features.eyebrow} title={features.title} lead={features.lead}>
       <ul class="protocols" data-reveal-items>
         {features.protocols.map((p) => <li><ProtocolCard {...p} /></li>)}
       </ul>
@@ -223,6 +223,9 @@ const jsonLd = [buildSoftwareApplication({ site: Astro.site!, version: data.vers
     .extras,
     .cards {
       grid-template-columns: repeat(2, 1fr);
+    }
+    .cards > :last-child {
+      grid-column: 1 / -1;
     }
   }
   @media (min-width: 1024px) {

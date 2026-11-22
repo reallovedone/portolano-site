@@ -39,6 +39,8 @@ export const service = {
     welcome: "Portolano welcome screen with the connection tree and protocol shortcuts",
     terminal: "An SSH session in a Portolano terminal tab",
     connectionEditor: "The connection editor for an SSH host",
+    connections: "The connection tree with coloured folders and icons, next to an open session",
+    settings: "The Settings window with theme, colour theme and accent options",
     import: "The import preview listing hosts to bring in",
   },
 };
@@ -94,6 +96,7 @@ export type ProtocolKind = "ssh" | "rdp" | "vnc" | "web" | "localShell";
 export const features = {
   eyebrow: "PORTS OF CALL",
   title: "Five kinds of connection, one set of tabs.",
+  lead: "Every session gets the same slim toolbar: Reconnect, Duplicate and Close, Ctrl+Alt+Del for remote desktops, and a Home tab one click away.",
   protocols: [
     {
       kind: "ssh",
@@ -130,12 +133,22 @@ export const features = {
     {
       icon: "folder-tree",
       title: "A tree, not a list.",
-      text: "Folders, tags, search and drag and drop. Credentials are inherited from the parent folder.",
+      text: "Folders, tags, search and drag and drop, in alphabetical order or your own. Credentials are inherited from the parent folder.",
+    },
+    {
+      icon: "folder-sync",
+      title: "Shared folders.",
+      text: "Publish a folder as a signed file on a network drive, OneDrive, Nextcloud or an internal web server. Colleagues subscribe and see it read-only, with their own credentials.",
     },
     {
       icon: "lock",
       title: "An encrypted vault, if you want one.",
-      text: "With no credential assigned, Portolano simply asks when you connect.",
+      text: "With no credential assigned, Portolano simply asks when you connect. After the first unlock, Touch ID or Windows Hello opens it again.",
+    },
+    {
+      icon: "palette",
+      title: "Make it yours.",
+      text: "An icon and a colour for any connection or folder. Light or dark, four colour themes, five accent colours and a compact list.",
     },
     {
       icon: "file-input",
@@ -145,7 +158,7 @@ export const features = {
     {
       icon: "refresh-cw",
       title: "Updates you approve.",
-      text: "Portolano checks for new versions, shows what changed and asks before installing. Every update is verified with the project's signing key.",
+      text: "Portolano checks for new versions, shows what changed and asks before installing. Every update is verified with the project's signing key. Release candidates only if you ask for them.",
     },
   ] as Array<{ icon: string; title: string; text: string }>,
 };
@@ -155,13 +168,24 @@ export const showcase = {
   title: "Quiet until you need it.",
   subtitle: "The remote session is the point. Everything else gets out of the way.",
   screens: [
-    { id: "welcome", tab: "Welcome", caption: "Every host is a port of call.", alt: service.screenAlt.welcome },
+    {
+      id: "connections",
+      tab: "Connections",
+      caption: "Icons, colours and your own order.",
+      alt: service.screenAlt.connections,
+    },
     { id: "terminal", tab: "Terminal", caption: "SSH and local shells in a real terminal.", alt: service.screenAlt.terminal },
     {
       id: "connection-editor",
-      tab: "Connection editor",
+      tab: "Editor",
       caption: "One form per protocol, nothing you don't need.",
       alt: service.screenAlt.connectionEditor,
+    },
+    {
+      id: "settings",
+      tab: "Settings",
+      caption: "Four colour themes, five accents, light or dark.",
+      alt: service.screenAlt.settings,
     },
     {
       id: "import",
@@ -193,6 +217,10 @@ export const security = {
     {
       title: "Nothing phones home.",
       text: "No telemetry, no account, no cloud. Besides your own hosts, the app only contacts GitHub to look for updates — and you can turn that off.",
+    },
+    {
+      title: "Shared, not trusted.",
+      text: "Shared folders are signed by whoever publishes them and read-only for everyone else. What comes in never carries credentials, never turns off certificate or NLA checks and never runs a local program.",
     },
   ],
   foundations: "russh · IronRDP · rustls · RustCrypto",
@@ -229,7 +257,7 @@ export const roadmap = {
     },
     {
       title: "Sync.",
-      text: "The same connection tree on every computer you use.",
+      text: "Shared folders were the first step. Next: your own connection tree, the same on every computer you use.",
     },
   ],
   last: {
@@ -261,7 +289,7 @@ export const faq: { eyebrow: string; title: string; items: FaqItem[] } = {
     },
     {
       q: "Where are my passwords stored?",
-      a: "Only on your computer, in an encrypted vault file in the system's application-data folder. Your master password is never stored, and the vault locks after 15 minutes of inactivity.",
+      a: "Only on your computer, in an encrypted vault file in the system's application-data folder. Your master password is never stored. The vault locks after 15 minutes of inactivity, or after the time you choose, and can be reopened with Touch ID or Windows Hello.",
     },
     {
       q: "Why does my system warn me when I open it?",
@@ -269,11 +297,15 @@ export const faq: { eyebrow: string; title: string; items: FaqItem[] } = {
     },
     {
       q: "How do updates work?",
-      a: "From version 0.2.0, Portolano checks GitHub for a new release and installs it only if you agree, after verifying it with the project's signing key. The automatic check can be turned off.",
+      a: "From version 0.2.0, Portolano checks GitHub for a new release and installs it only if you agree, after verifying it with the project's signing key. The automatic check can be turned off, and in Settings you can choose to be offered release candidates too. The release notes of every version are inside the app.",
     },
     {
       q: "Can I bring my connections from another tool?",
       a: "Yes: from OpenSSH config, .rdp files, MobaXterm, mRemoteNG and CSV. You see a preview first, and passwords are never imported.",
+    },
+    {
+      q: "Can my team share connections?",
+      a: "Yes, from version 0.4.0: publish a folder as a signed file on a network drive, a cloud folder or an internal web server, and colleagues subscribe to it. Shared folders are read-only and never carry passwords: everyone uses their own credentials.",
     },
     {
       q: "Is it ready for production servers?",
