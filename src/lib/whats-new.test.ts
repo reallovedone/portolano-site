@@ -31,11 +31,13 @@ function webpSize(bytes: Uint8Array): { width: number; height: number } {
   return { width: view.getUint16(26, true) & 0x3fff, height: view.getUint16(28, true) & 0x3fff };
 }
 
-const versions = fs.readdirSync(dir);
+// Hidden files (Finder's .DS_Store) are git-ignored and never published.
+const list = (url: URL): string[] => fs.readdirSync(url).filter((name) => !name.startsWith("."));
+const versions = list(dir);
 
 describe("public/whats-new", () => {
   it("has the 0.4.0 screenshots the app links to", () => {
-    expect(fs.readdirSync(new URL("0.4.0/", dir)).sort()).toEqual(
+    expect(list(new URL("0.4.0/", dir)).sort()).toEqual(
       ["connections-dark.webp", "connections-light.webp", "settings-dark.webp", "settings-light.webp"],
     );
   });
@@ -43,7 +45,7 @@ describe("public/whats-new", () => {
   for (const version of versions) {
     it(`${version}: names, themes and size`, () => {
       expect(version).toMatch(/^\d+\.\d+\.\d+$/);
-      const files = fs.readdirSync(new URL(`${version}/`, dir));
+      const files = list(new URL(`${version}/`, dir));
       for (const file of files) {
         expect(file).toMatch(/^[a-z0-9-]+-(light|dark)\.webp$/);
         const other = file.endsWith("-light.webp") ? file.replace("-light.", "-dark.") : file.replace("-dark.", "-light.");

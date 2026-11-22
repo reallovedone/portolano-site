@@ -6,7 +6,7 @@ import ThemedScreen from "../ThemedScreen.astro";
 import WindowFrame from "../WindowFrame.astro";
 import Compass from "./Compass.astro";
 import "./hero.css";
-import { hero, nav, REPO_URL, service, showcase } from "../../content/copy";
+import { hero, nav, REPO_URL, service } from "../../content/copy";
 import { formatCount, visibleStat, type GithubData } from "../../lib/github";
 
 interface Props {
@@ -46,7 +46,7 @@ const stars = visibleStat(data.stars);
     <div class="container">
       <div class="window" data-hero-window>
         <WindowFrame>
-          <ThemedScreen id="welcome" alt={showcase.screens[0].alt} sizes="(min-width: 1184px) 960px, calc(100vw - 32px)" />
+          <ThemedScreen id="welcome" alt={service.screenAlt.welcome} sizes="(min-width: 1184px) 960px, calc(100vw - 32px)" />
         </WindowFrame>
       </div>
     </div>
