@@ -12,7 +12,7 @@ export type TextPart = string | { em: string };
 export const meta = {
   title: "Portolano — One window for every remote connection",
   description:
-    "SSH, RDP, VNC, web consoles and local shells in tabs, with an encrypted vault. Free and open source, for macOS and Windows.",
+    "SSH, RDP, VNC, web consoles and local shells in tabs, with an encrypted vault and shared folders for your team. Free and open source, for macOS and Windows.",
 };
 
 export const service = {
@@ -42,6 +42,8 @@ export const service = {
     connections: "The connection tree with coloured folders and icons, next to an open session",
     settings: "The Settings window with theme, colour theme and accent options",
     import: "The import preview listing hosts to bring in",
+    sharing:
+      "The Share info window of a subscribed shared folder, showing the owner, the fingerprint, the revision and the time of the last sync",
   },
 };
 
@@ -49,6 +51,8 @@ export const nav = {
   brand: "Portolano",
   links: [
     { label: "Features", href: "#features" },
+    { label: "Sharing", href: "#sharing" },
+    { label: "Vault", href: "#vault" },
     { label: "Security", href: "#security" },
     { label: "Download", href: "#download" },
   ],
@@ -59,7 +63,7 @@ export const hero = {
   eyebrow: "OPEN SOURCE · MACOS AND WINDOWS",
   title: "One window for every remote connection.",
   subtitle:
-    "SSH, RDP, VNC, web consoles and local shells — in tabs, with an encrypted vault. Free, with no account and no subscription.",
+    "SSH, RDP, VNC, web and local shells in tabs, with an encrypted vault and shared folders. Free, with no account and no subscription.",
   primary: "View on GitHub",
   downloadMac: "Download for macOS",
   downloadWindows: "Download for Windows",
@@ -139,11 +143,13 @@ export const features = {
       icon: "folder-sync",
       title: "Shared folders.",
       text: "Publish a folder as a signed file on a network drive, OneDrive, Nextcloud or an internal web server. Colleagues subscribe and see it read-only, with their own credentials.",
+      link: { label: "How sharing works →", href: "#sharing" },
     },
     {
       icon: "lock",
       title: "An encrypted vault, if you want one.",
       text: "With no credential assigned, Portolano simply asks when you connect. After the first unlock, Touch ID or Windows Hello opens it again.",
+      link: { label: "Inside the vault →", href: "#vault" },
     },
     {
       icon: "palette",
@@ -160,7 +166,7 @@ export const features = {
       title: "Updates you approve.",
       text: "Portolano checks for new versions, shows what changed and asks before installing. Every update is verified with the project's signing key. Release candidates only if you ask for them.",
     },
-  ] as Array<{ icon: string; title: string; text: string }>,
+  ] as Array<{ icon: string; title: string; text: string; link?: { label: string; href: string } }>,
 };
 
 export const showcase = {
@@ -173,6 +179,12 @@ export const showcase = {
       tab: "Connections",
       caption: "Icons, colours and your own order.",
       alt: service.screenAlt.connections,
+    },
+    {
+      id: "sharing",
+      tab: "Sharing",
+      caption: "A shared folder shows who signed it, and when it last synced.",
+      alt: service.screenAlt.sharing,
     },
     { id: "terminal", tab: "Terminal", caption: "SSH and local shells in a real terminal.", alt: service.screenAlt.terminal },
     {
@@ -196,6 +208,96 @@ export const showcase = {
   ],
 };
 
+/**
+ * Spotlight sections (shared folders, vault): four steps next to an SVG diagram.
+ * `diagram.label` describes the whole SVG (role="img"); the other diagram strings are drawn inside it.
+ */
+export interface SpotlightStep {
+  title: string;
+  text: string;
+}
+
+/** Shared folders spotlight (README: "Shared folders", "Security"). */
+export const sharingSpotlight = {
+  id: "sharing" as const,
+  eyebrow: "SHARED FOLDERS",
+  title: "One folder, the whole team.",
+  lead: "One person keeps a folder of connections up to date and the others subscribe to it. No Git, no server software, no account.",
+  steps: [
+    {
+      title: "Publish.",
+      text: "Right-click a folder and choose Share. Portolano writes one .portolano-share file, signed with your identity: a name and a short fingerprint you can compare on the phone.",
+    },
+    {
+      title: "Put it where the team looks.",
+      text: "A network drive, a OneDrive or Nextcloud folder, or the folder an internal web server publishes. When you change the folder, publish again.",
+    },
+    {
+      title: "Subscribe.",
+      text: "Colleagues choose Add Remote Folder. It appears read-only in their tree and is checked at startup, every 15 minutes and with Sync now.",
+    },
+    {
+      title: "What never comes in.",
+      text: "No credentials, no disabled certificate or NLA checks, no local shells or programs. Everyone connects with their own credentials.",
+    },
+  ] as SpotlightStep[],
+  diagram: {
+    label:
+      "A folder named Production is published as one signed .portolano-share file with the owner's fingerprint, placed on a network drive, OneDrive, Nextcloud or a web server, and read by three colleagues as a read-only folder. Credentials, disabled checks and local programs are stopped on the way.",
+    folder: "Production",
+    file: ".portolano-share",
+    fingerprint: "7F3A-91C2-0B4D-E6A8",
+    places: ["Network drive", "OneDrive", "Nextcloud", "Web server"],
+    people: ["Colleague", "Colleague", "Colleague"],
+    blocked: ["Credentials", "Checks off", "Local programs"],
+    readOnly: "read-only",
+  },
+};
+
+/** Vault spotlight (README: "Security", "How the vault is encrypted"). */
+export const vaultSpotlight = {
+  id: "vault" as const,
+  eyebrow: "THE VAULT",
+  title: "Locked by design.",
+  lead: "Credentials live in an encrypted vault on your computer. Your master password is never stored.",
+  steps: [
+    {
+      title: "Stretch the password.",
+      text: "Argon2id (64 MiB of memory, 3 passes) turns your master password into a key that exists only in memory.",
+    },
+    {
+      title: "Wrap the data key.",
+      text: "A random 256-bit data key encrypts the vault. The password-derived key wraps it, so changing the master password creates a new one.",
+    },
+    {
+      title: "Seal the credentials.",
+      text: "XChaCha20-Poly1305 is an authenticated cipher: a vault file changed by a single bit is rejected, not decrypted.",
+    },
+    {
+      title: "Lock and reopen.",
+      text: "The vault locks after 15 minutes of inactivity by default (5, 30, 60 or never) and keys are zeroed. Touch ID or Windows Hello reopens it after the first unlock.",
+    },
+  ] as SpotlightStep[],
+  diagram: {
+    label:
+      "The master password goes through Argon2id with 64 MiB and 3 passes and becomes a key held only in memory. That key wraps a 256-bit data key, which seals the credentials with XChaCha20-Poly1305 into the vault file. A file with one bit changed is rejected. After 15 minutes the vault locks, and Touch ID or Windows Hello unlocks it again.",
+    password: "••••••••••",
+    kdf: "Argon2id",
+    kdfParams: "64 MiB · 3 passes",
+    memoryKey: "key · memory only",
+    dataKey: "data key · 256-bit",
+    cipher: "XChaCha20-Poly1305",
+    file: "vault file",
+    tampered: "1 bit changed",
+    rejected: "rejected",
+    lock: "15 min",
+    unlock: "Touch ID · Windows Hello",
+  },
+};
+
+/** Both spotlights, keyed by section anchor id. */
+export const spotlights = { sharing: sharingSpotlight, vault: vaultSpotlight };
+
 export const security = {
   eyebrow: "SECURITY",
   title: "A tool that holds the keys to your servers has to earn trust.",
@@ -205,6 +307,7 @@ export const security = {
     {
       title: "The vault.",
       text: "Argon2id stretches your master password into a key that only ever exists in memory. Credentials are encrypted with XChaCha20-Poly1305: a vault file altered by a single bit is rejected, not decrypted.",
+      link: { label: "Inside the vault →", href: "#vault" },
     },
     {
       title: 'No "connect anyway".',
@@ -221,6 +324,7 @@ export const security = {
     {
       title: "Shared, not trusted.",
       text: "Shared folders are signed by whoever publishes them and read-only for everyone else. What comes in never carries credentials, never turns off certificate or NLA checks and never runs a local program.",
+      link: { label: "How sharing works →", href: "#sharing" },
     },
   ],
   foundations: "russh · IronRDP · rustls · RustCrypto",

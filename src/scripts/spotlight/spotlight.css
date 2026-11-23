@@ -1,0 +1,20 @@
+/* ==========================================================================
+   Spotlight scenes (shared folders, vault). Tokens and the shared layout hooks.
+   Pre-animation (hidden / dimmed) states exist only once the spotlight script is running
+   (html.spotlight-ready) and never on a section that failed (.spotlight-off), so without JS, with
+   reduced motion or after an error the diagram is complete and every step reads as active.
+   Scenes animate only transform, opacity and stroke-dashoffset, read durations with `cssMs`.
+   ========================================================================== */
+
+:root {
+  /* One scene step: how long a diagram part takes to move into place. */
+  --spotlight-step-dur: 700ms;
+  /* Below 1024px the steps play on their own, one every this long. */
+  --spotlight-autoplay-step: 1400ms;
+  /* Wide layout: gap between the nav and the top of the pinned stage area, and height of one step. */
+  --spotlight-sticky-offset: var(--web-nav-h);
+  --spotlight-step-min: 75svh;
+  /* Narrow layout: tallest the diagram gets. */
+  --spotlight-stage-max-h: 70svh;
+  --spotlight-marker-w: 2px;
+}
