@@ -11,11 +11,14 @@ import GithubBand from "../components/github/GithubBand.astro";
 import Hero from "../components/hero/Hero.astro";
 import RouteLine from "../components/route-line/RouteLine.astro";
 import PilotSheet from "../components/pilot-sheet/PilotSheet.astro";
+import Spotlight from "../components/spotlight/Spotlight.astro";
+import SharingDiagram from "../components/spotlight/SharingDiagram.astro";
+import VaultDiagram from "../components/spotlight/VaultDiagram.astro";
 import Showcase from "../components/showcase/Showcase.astro";
 import Faq from "../components/faq/Faq.astro";
 import Roadmap from "../components/roadmap/Roadmap.astro";
 import TerminalDemo from "../components/terminal/TerminalDemo.astro";
-import { faq, features, name, security, SECURITY_URL } from "../content/copy";
+import { faq, features, name, security, SECURITY_URL, spotlights } from "../content/copy";
 import { getGithubData } from "../lib/github";
 import { buildFaqPage, buildSoftwareApplication } from "../lib/seo";
 import "../scripts/motion/motion.css";
@@ -59,12 +62,39 @@ const jsonLd = [buildSoftwareApplication({ site: Astro.site!, version: data.vers
               <div>
                 <h3 class="extra-title">{e.title}</h3>
                 <p class="extra-text">{e.text}</p>
+                {e.link && <Button href={e.link.href} variant="text" class="extra-link">{e.link.label}</Button>}
               </div>
             </li>
           ))
         }
       </ul>
     </Section>
+
+    <Spotlight
+      id={spotlights.sharing.id}
+      titleId="sharing-title"
+      tone="content"
+      eyebrow={spotlights.sharing.eyebrow}
+      title={spotlights.sharing.title}
+      lead={spotlights.sharing.lead}
+      steps={spotlights.sharing.steps}
+      diagramLabel={spotlights.sharing.diagram.label}
+    >
+      <SharingDiagram />
+    </Spotlight>
+
+    <Spotlight
+      id={spotlights.vault.id}
+      titleId="vault-title"
+      tone="window"
+      eyebrow={spotlights.vault.eyebrow}
+      title={spotlights.vault.title}
+      lead={spotlights.vault.lead}
+      steps={spotlights.vault.steps}
+      diagramLabel={spotlights.vault.diagram.label}
+    >
+      <VaultDiagram />
+    </Spotlight>
 
     <Showcase />
 
@@ -75,6 +105,7 @@ const jsonLd = [buildSoftwareApplication({ site: Astro.site!, version: data.vers
             <li class="sec-card">
               <h3 class="t-h3">{c.title}</h3>
               <p>{c.text}</p>
+              {c.link && <Button href={c.link.href} variant="text" class="card-link">{c.link.label}</Button>}
             </li>
           ))
         }
@@ -99,6 +130,7 @@ const jsonLd = [buildSoftwareApplication({ site: Astro.site!, version: data.vers
 
 <script>
   import "../scripts/motion/index";
+  import "../scripts/spotlight/index";
 </script>
 
 <style>
@@ -161,6 +193,9 @@ const jsonLd = [buildSoftwareApplication({ site: Astro.site!, version: data.vers
     font-size: var(--font-size-lg);
     font-weight: var(--font-weight-semibold);
   }
+  .extra-link {
+    margin-block-start: var(--space-1);
+  }
   .extra-text {
     margin-block-start: var(--space-1);
     color: var(--text-secondary);
@@ -185,6 +220,10 @@ const jsonLd = [buildSoftwareApplication({ site: Astro.site!, version: data.vers
   .sec-card p {
     color: var(--text-secondary);
     line-height: var(--line-height-relaxed);
+  }
+  .card-link {
+    margin-block-start: auto;
+    align-self: flex-start;
   }
   .foundations {
     font-family: var(--font-mono);

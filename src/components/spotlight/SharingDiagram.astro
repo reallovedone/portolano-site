@@ -1,0 +1,191 @@
+---
+import { spotlights } from "../../content/copy";
+
+const d = spotlights.sharing.diagram;
+
+// Geometry (viewBox units). Layout is a single vertical flow so it stays legible at phone width:
+// folder -> file, file -> places (stacked), places -> people along three drops, filter between.
+const placeYs = [116, 152, 188, 224];
+const placeCenters = placeYs.map((y) => y + 14);
+const columns = [66, 200, 334];
+const BOUNDARY_Y = 352;
+const CHIP_REST_Y = 320;
+const CHIP_DROP = 34;
+const BUS_Y = 272;
+const PEOPLE_Y = 396;
+const STACK_EXIT_X = 270;
+const STACK_EXIT_Y = placeYs[placeYs.length - 1] + 28;
+
+const fan = placeCenters.map((y) => `M140 86 C140 ${y} 152 ${y} 170 ${y}`);
+const routes = columns.map((c) => `M${STACK_EXIT_X} ${STACK_EXIT_Y} V${BUS_Y} H${c} V${PEOPLE_Y}`);
+
+// Folder glyph, 44 x 36 at the origin.
+const FOLDER = "M0 6a4 4 0 0 1 4-4h12l5 6h19a4 4 0 0 1 4 4v22a4 4 0 0 1-4 4H4a4 4 0 0 1-4-4z";
+---
+
+<svg viewBox="0 0 400 480" aria-hidden="true" focusable="false" fill="none" class="sharing">
+  <g data-part="publish">
+    <g data-fade class="node-group">
+      <g transform="translate(20 32)">
+        <path class="node" d={FOLDER}></path>
+      </g>
+      <text class="label" x="42" y="88" text-anchor="middle">{d.folder}</text>
+    </g>
+    <path class="route" data-trace pathLength="1" d="M68 50H130"></path>
+    <g data-fade class="node-group">
+      <rect class="card" x="130" y="14" width="250" height="72"></rect>
+      <circle class="seal" cx="158" cy="50" r="12"></circle>
+      <path class="seal" d="M152 50l4 4 8-9"></path>
+      <text class="label strong" x="182" y="46">{d.file}</text>
+      <text class="mono" x="182" y="66">{d.fingerprint}</text>
+    </g>
+  </g>
+
+  <g data-part="places">
+    {fan.map((p) => <path class="route" data-trace pathLength="1" d={p}></path>)}
+    {
+      placeYs.map((y, i) => (
+        <g data-fade class="node-group">
+          <rect class="node" x="170" y={y} width="200" height="28"></rect>
+          <text class="label" x="186" y={placeCenters[i]} dy="0.35em">{d.places[i]}</text>
+        </g>
+      ))
+    }
+  </g>
+
+  <g data-part="subscribe">
+    {routes.map((p) => <path class="route" data-trace data-route pathLength="1" d={p}></path>)}
+    {
+      columns.map((c, i) => (
+        <g data-fade class="node-group">
+          <rect class="node" x={c - 62} y={PEOPLE_Y} width="124" height="68"></rect>
+          <text class="label strong" x={c} y={PEOPLE_Y + 24} text-anchor="middle" dy="0.35em">{d.people[i]}</text>
+          <g transform={`translate(${c - 52} ${PEOPLE_Y + 40}) scale(0.36)`}>
+            <path class="glyph" d={FOLDER}></path>
+          </g>
+          <rect class="tag" x={c - 30} y={PEOPLE_Y + 38} width="82" height="20"></rect>
+          <text class="mono" x={c + 11} y={PEOPLE_Y + 48} text-anchor="middle" dy="0.35em">{d.readOnly}</text>
+        </g>
+      ))
+    }
+  </g>
+
+  <g data-part="filter">
+    <line class="boundary" data-fade="flat" x1="0" y1={BOUNDARY_Y} x2="400" y2={BOUNDARY_Y}></line>
+    {
+      columns.map((c, i) => (
+        <g class="chip" data-chip data-drop={CHIP_DROP}>
+          <rect x={c - 62} y={CHIP_REST_Y} width="124" height="26"></rect>
+          <text x={c} y={CHIP_REST_Y + 13} text-anchor="middle" dy="0.35em">{d.blocked[i]}</text>
+        </g>
+      ))
+    }
+    {
+      columns.map((c) => (
+        <path class="mark" data-fade="flat" d={`M${c - 4} ${BOUNDARY_Y - 4}l8 8m-8 0 8-8`}></path>
+      ))
+    }
+  </g>
+
+  <g class="dots">
+    {columns.map(() => <circle class="dot" data-dot r="2" cx="0" cy="0"></circle>)}
+  </g>
+</svg>
+
+<style>
+  /* Scene tokens. Durations are read by the scene with cssMs, the opacity and rise with parseFloat. */
+  :global(:root) {
+    /* A travelling dot crosses a route. */
+    --sharing-travel-dur: 1400ms;
+    /* Pause between two crossings of the same route. */
+    --sharing-loop-pause: 700ms;
+    /* Delay between siblings (nodes, lines, packets) when a part appears. */
+    --sharing-stagger: 90ms;
+    /* Parts rise this far while they fade in. */
+    --sharing-rise: 8px;
+    /* Blocked packets rest at the boundary at this opacity (struck, not erased). */
+    --sharing-blocked-opacity: 0.7;
+  }
+
+  .sharing {
+    --sharing-stroke: var(--web-hairline);
+    font-family: var(--font-mono);
+  }
+  .sharing :is(path, rect, line, circle) {
+    vector-effect: non-scaling-stroke;
+    stroke-width: var(--sharing-stroke);
+  }
+  .route {
+    stroke: var(--border-strong);
+    stroke-linejoin: round;
+  }
+  .node,
+  .glyph {
+    fill: var(--surface-window);
+    stroke: var(--border-strong);
+  }
+  .glyph {
+    stroke-linejoin: round;
+  }
+  .card {
+    fill: var(--surface-content);
+    stroke: var(--border-strong);
+    rx: var(--radius-panel);
+  }
+  rect.node {
+    rx: var(--radius-control);
+  }
+  .tag {
+    fill: none;
+    stroke: var(--border-hairline);
+    rx: var(--radius-full);
+  }
+  .seal {
+    stroke: var(--accent);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  circle.seal {
+    fill: var(--surface-content);
+  }
+  .boundary {
+    stroke: var(--border-strong);
+    stroke-dasharray: 4 4;
+  }
+  .mark {
+    stroke: var(--text-tertiary);
+    stroke-linecap: round;
+  }
+  .chip {
+    opacity: var(--sharing-blocked-opacity);
+  }
+  .chip rect {
+    fill: var(--surface-window);
+    stroke: var(--border-hairline);
+    rx: var(--radius-control);
+  }
+  .chip text {
+    fill: var(--text-secondary);
+  }
+  .dot {
+    fill: var(--accent);
+    stroke: none;
+    opacity: 0;
+  }
+
+  text {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    fill: var(--text-secondary);
+  }
+  .strong {
+    fill: var(--text-primary);
+  }
+  .mono {
+    font-size: var(--font-size-sm);
+    fill: var(--text-tertiary);
+  }
+  .chip text {
+    font-size: 13px;
+  }
+</style>

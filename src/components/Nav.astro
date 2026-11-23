@@ -106,7 +106,8 @@ const shownStars = visibleStat(stars);
     font-size: var(--font-size-md);
     color: var(--text-secondary);
   }
-  @media (min-width: 768px) {
+  /* Five links plus GitHub and the theme toggle need about 735px of bar; show them from 900px. */
+  @media (min-width: 900px) {
     .links {
       display: flex;
     }

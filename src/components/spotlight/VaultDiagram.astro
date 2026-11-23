@@ -1,0 +1,198 @@
+---
+// "The vault" scene diagram: a vertical pipeline in four steps (stretch, memory, seal, lock). The markup is
+// the FINAL, complete picture: that is what no-JS and reduced-motion visitors see. The scene script
+// (src/scripts/spotlight/vault.ts) hides the parts at start-up and reveals them step by step, addressing
+// them through `data-part` (one group per step) and `data-el` (the pieces inside).
+// Strokes are drawn in user units (no non-scaling stroke) so dash traces with pathLength="1" stay exact.
+import { spotlights } from "../../content/copy";
+
+const d = spotlights.vault.diagram;
+const [unlockTop, unlockBottom] = d.unlock.split(" · ");
+---
+
+<svg class="vault" viewBox="0 0 400 620" fill="none" aria-hidden="true" focusable="false">
+  <defs>
+    <!-- Key glyph, 28 x 12, drawn from its top-left corner. -->
+    <g id="vault-key">
+      <circle cx="6" cy="6" r="5"></circle>
+      <path d="M11 6H27M22 6V10M27 6V10"></path>
+    </g>
+  </defs>
+
+  <!-- 1. Stretch: master password -> Argon2id -->
+  <g data-part="stretch">
+    <g data-el="field">
+      <rect class="box" x="24" y="20" width="212" height="36" rx="6"></rect>
+      <text class="txt" x="40" y="43">{d.password}</text>
+    </g>
+    <g data-el="kdf">
+      <rect class="box" x="24" y="92" width="212" height="36" rx="6"></rect>
+      <text class="txt strong" x="40" y="115">{d.kdf}</text>
+    </g>
+    <path class="ln trace" data-el="loop" data-hl d="M236 38H352V110H238M245 105L237 110L245 115" pathLength="1"></path>
+    <text class="txt dim" data-el="params" x="236" y="150" text-anchor="end">{d.kdfParams}</text>
+    <path class="ln trace" data-el="out" d="M70 128V176" pathLength="1"></path>
+  </g>
+
+  <!-- 2. Key in memory, wrapping the data key -->
+  <g data-part="memory">
+    <rect class="ln dashed" data-el="outline" data-hl x="24" y="176" width="340" height="126" rx="10"></rect>
+    <g data-el="mkey">
+      <use class="glyph" href="#vault-key" x="40" y="190"></use>
+      <text class="txt dim" x="76" y="200">{d.memoryKey}</text>
+      <path class="ln soft" d="M54 204V216"></path>
+    </g>
+    <g data-el="wrap">
+      <rect class="box" x="40" y="216" width="308" height="70" rx="8"></rect>
+      <use class="glyph" href="#vault-key" x="58" y="246"></use>
+      <text class="txt" x="100" y="256">{d.dataKey}</text>
+    </g>
+  </g>
+
+  <!-- 3. Seal: XChaCha20-Poly1305 into the vault file; a tampered copy is rejected -->
+  <g data-part="seal">
+    <path class="ln trace" data-el="feed" data-hl d="M70 302V342M65 336L70 342L75 336" pathLength="1"></path>
+    <text class="txt dim" data-el="cipher" x="84" y="326">{d.cipher}</text>
+    <g data-el="file">
+      <rect class="box" x="24" y="342" width="150" height="104" rx="6"></rect>
+      <text class="txt dim" x="38" y="362">{d.file}</text>
+      <path class="ln soft" d="M24 372H174"></path>
+    </g>
+    <rect class="bar" data-el="row" x="38" y="384" width="104" height="8" rx="2"></rect>
+    <rect class="bar" data-el="row" x="38" y="402" width="78" height="8" rx="2"></rect>
+    <rect class="bar" data-el="row" x="38" y="420" width="92" height="8" rx="2"></rect>
+    <g data-el="ghost">
+      <path class="ln soft dashed" d="M174 394H214"></path>
+      <rect class="ln soft dashed" x="214" y="342" width="150" height="104" rx="6"></rect>
+      <text class="txt dim" x="228" y="362">{d.tampered}</text>
+      <path class="ln soft" d="M214 372H364"></path>
+      <rect class="bar ghost" x="228" y="384" width="104" height="8" rx="2"></rect>
+      <rect class="bar ghost" x="240" y="402" width="78" height="8" rx="2"></rect>
+      <rect class="bar ghost" x="228" y="420" width="92" height="8" rx="2"></rect>
+    </g>
+    <g data-el="reject">
+      <rect class="ln soft" x="214" y="458" width="104" height="28" rx="14"></rect>
+      <path class="ln cross" d="M230 468L238 476M238 468L230 476"></path>
+      <text class="txt dim" x="246" y="477">{d.rejected}</text>
+    </g>
+  </g>
+
+  <!-- 4. Lock and reopen -->
+  <g data-part="lock">
+    <path class="ln trace" data-el="link" d="M70 446V512" pathLength="1"></path>
+    <circle class="track" data-el="track" cx="70" cy="548" r="36"></circle>
+    <circle class="ring trace" data-el="ring" data-hl cx="70" cy="548" r="36" pathLength="1" transform="rotate(-90 70 548)"></circle>
+    <g data-el="lockglyph" class="glyph">
+      <rect x="58" y="549" width="24" height="18" rx="3"></rect>
+      <path data-el="shackle" class="shackle" d="M63 549V543A7 7 0 0 1 77 543V549"></path>
+    </g>
+    <text class="txt" data-el="lockLabel" x="70" y="606" text-anchor="middle">{d.lock}</text>
+    <path class="ln soft dashed" data-el="reopen" d="M228 548H112M119 543L112 548L119 553"></path>
+    <g class="glyph" data-el="unlockglyph">
+      <path d="M235 552A15 15 0 0 1 265 552M240 552A10 10 0 0 1 260 552M245 552A5 5 0 0 1 255 552M250 552V566"></path>
+    </g>
+    <g data-el="unlockLabel">
+      <text class="txt" x="282" y="546">{unlockTop}</text>
+      <text class="txt" x="282" y="564">{unlockBottom}</text>
+    </g>
+  </g>
+</svg>
+
+<style>
+  .vault {
+    /* Scene tokens (user units: the drawing is scaled with the figure). */
+    --vault-stroke: 1.25px;
+    --vault-ring-w: 2px;
+    --vault-dash: 4 4;
+    --vault-text: 13px;
+    --vault-line: var(--border-strong);
+    --vault-soft: var(--border-hairline);
+    --vault-lift: 4px;
+    font-family: var(--font-mono);
+    font-size: var(--vault-text);
+  }
+
+  .ln,
+  .box,
+  .glyph,
+  .glyph :is(path, circle, rect),
+  .track,
+  .ring {
+    stroke-width: var(--vault-stroke);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .ln {
+    stroke: var(--vault-line);
+    fill: none;
+  }
+  .soft {
+    stroke: var(--vault-soft);
+  }
+  .dashed {
+    stroke-dasharray: var(--vault-dash);
+  }
+  .box {
+    fill: var(--surface-raised);
+    stroke: var(--vault-line);
+  }
+  .glyph,
+  .glyph :is(path, circle, rect) {
+    stroke: var(--text-secondary);
+    fill: none;
+  }
+  .bar {
+    fill: var(--vault-line);
+    stroke: none;
+  }
+  .bar.ghost {
+    fill: var(--vault-soft);
+  }
+  .cross {
+    stroke: var(--text-tertiary);
+  }
+
+  /* Traced lines: dash pattern 1 2 over pathLength 1 (same idiom as the corner rose in motion.css). */
+  .trace {
+    stroke-dasharray: 1 2;
+    stroke-dashoffset: 0;
+  }
+  .track {
+    fill: none;
+    stroke: var(--decor-line-strong);
+    stroke-width: var(--vault-ring-w);
+  }
+  .ring {
+    fill: none;
+    stroke: var(--vault-line);
+    stroke-width: var(--vault-ring-w);
+  }
+
+  /* Rows grow from their left edge. */
+  [data-el="row"] {
+    transform-box: fill-box;
+    transform-origin: left center;
+  }
+  /* Final state: the shackle is lifted (vault reopened). */
+  .shackle {
+    transform: translateY(calc(var(--vault-lift) * -1));
+  }
+
+  .txt {
+    fill: var(--text-secondary);
+  }
+  .txt.strong {
+    fill: var(--text-primary);
+  }
+  .txt.dim {
+    fill: var(--text-tertiary);
+  }
+
+  /* The one accent: the line of the step being shown (the script sets data-current on its group). */
+  [data-hl] {
+    transition: stroke var(--web-duration-fade) var(--ease-standard);
+  }
+  [data-current] [data-hl] {
+    stroke: var(--accent);
+  }
+</style>
