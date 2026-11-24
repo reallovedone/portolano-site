@@ -14,6 +14,8 @@ interface Props {
 }
 const { data } = Astro.props;
 const stars = visibleStat(data.stars);
+// Looked up by anchor, not position: the nav order changes when sections are added.
+const downloadLabel = nav.links.find((link) => link.href === "#download")?.label ?? "";
 ---
 
 <section class="hero" aria-labelledby="hero-title" data-hero>
@@ -37,7 +39,7 @@ const stars = visibleStat(data.stars);
           {stars !== null && <span class="stars" aria-hidden="true">★ {formatCount(stars)}</span>}
         </Button>
         <!-- No JavaScript: a plain link to the download section. data-os-download lets the detected-OS script (S3) upgrade it. -->
-        <Button href="#download" variant="secondary" size="lg" data-os-download>{nav.links[2].label}</Button>
+        <Button href="#download" variant="secondary" size="lg" data-os-download>{downloadLabel}</Button>
       </div>
       <p class="meta t-small rise" style="--k:4">{hero.meta(data.version)}</p>
     </div>

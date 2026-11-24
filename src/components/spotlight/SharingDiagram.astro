@@ -3,136 +3,146 @@ import { spotlights } from "../../content/copy";
 
 const d = spotlights.sharing.diagram;
 
-// Geometry (viewBox units). Layout is a single vertical flow so it stays legible at phone width:
-// folder -> file, file -> places (stacked), places -> people along three drops, filter between.
-const placeYs = [116, 152, 188, 224];
-const placeCenters = placeYs.map((y) => y + 14);
-const columns = [66, 200, 334];
-const BOUNDARY_Y = 352;
-const CHIP_REST_Y = 320;
-const CHIP_DROP = 34;
-const BUS_Y = 272;
-const PEOPLE_Y = 396;
-const STACK_EXIT_X = 270;
-const STACK_EXIT_Y = placeYs[placeYs.length - 1] + 28;
+// Horizontal flow, viewBox units: folder -> signed file -> places -> (filter) -> colleagues.
+// Each part carries its step (`s0`..`s3`) and `--i`, its stagger index.
+const MID = 120;
+const placeH = 34;
+const placeGap = 14;
+const placeTop = MID - (4 * placeH + 3 * placeGap) / 2;
+const placeYs = [0, 1, 2, 3].map((i) => placeTop + i * (placeH + placeGap));
+const placeCy = placeYs.map((y) => y + placeH / 2);
 
-const fan = placeCenters.map((y) => `M140 86 C140 ${y} 152 ${y} 170 ${y}`);
-const routes = columns.map((c) => `M${STACK_EXIT_X} ${STACK_EXIT_Y} V${BUS_Y} H${c} V${PEOPLE_Y}`);
+const PLACE_X = 296;
+const PLACE_W = 130;
+const BUS_X = 442;
+const FILTER_X = 474;
+const PERSON_X = 510;
+const PERSON_W = 130;
+const PERSON_H = 56;
+const personYs = [0, 1, 2].map((i) => MID - (3 * PERSON_H + 2 * 18) / 2 + i * (PERSON_H + 18));
+const personCy = personYs.map((y) => y + PERSON_H / 2);
+
+const CHIP_W = 132;
+const CHIP_H = 24;
+const chipYs = [0, 1, 2].map((i) => 240 + i * (CHIP_H + 8));
+
+const toPlaces = placeCy.map((y) => `M256 ${MID} C276 ${MID} 276 ${y} ${PLACE_X} ${y}`);
+const stubs = placeCy.map((y) => `M${PLACE_X + PLACE_W} ${y} H${BUS_X} V${MID}`);
+const toPeople = personCy.map((y) => `M${BUS_X} ${MID} C${FILTER_X + 8} ${MID} ${FILTER_X + 4} ${y} ${PERSON_X} ${y}`);
 
 // Folder glyph, 44 x 36 at the origin.
 const FOLDER = "M0 6a4 4 0 0 1 4-4h12l5 6h19a4 4 0 0 1 4 4v22a4 4 0 0 1-4 4H4a4 4 0 0 1-4-4z";
 ---
 
-<svg viewBox="0 0 400 480" aria-hidden="true" focusable="false" fill="none" class="sharing">
-  <g data-part="publish">
-    <g data-fade class="node-group">
-      <g transform="translate(20 32)">
-        <path class="node" d={FOLDER}></path>
+<svg viewBox="0 0 640 340" aria-hidden="true" focusable="false" fill="none" class="sharing">
+  <!-- Step 0: publish -->
+  <g class="el s0" style="--i:0">
+    <g transform={`translate(16 ${MID - 28}) scale(1.3)`}>
+      <path class="node" d={FOLDER}></path>
+    </g>
+    <text class="label" x="44" y={MID + 44} text-anchor="middle">{d.folder}</text>
+  </g>
+  <path class="route trace s0" style="--i:1" pathLength="1" d={`M78 ${MID} H108`}></path>
+  <g class="el s0" style="--i:2">
+    <rect class="card" x="108" y={MID - 46} width="148" height="92"></rect>
+    <rect class="ring r0" x="108" y={MID - 46} width="148" height="92"></rect>
+    <circle class="seal fill" cx="182" cy={MID - 22} r="11"></circle>
+    <path class="seal" d={`M176 ${MID - 22}l5 5 8-9`}></path>
+    <text class="label strong" x="182" y={MID + 10} text-anchor="middle">{d.file}</text>
+    <text class="mono" x="182" y={MID + 30} text-anchor="middle">{d.fingerprint}</text>
+  </g>
+
+  <!-- Step 1: put it where the team looks -->
+  {toPlaces.map((p, i) => <path class="route trace s1" style={`--i:${i}`} pathLength="1" d={p}></path>)}
+  {
+    placeYs.map((y, i) => (
+      <g class="el s1" style={`--i:${i + 1}`}>
+        <rect class="node" x={PLACE_X} y={y} width={PLACE_W} height={placeH}></rect>
+        <rect class="ring r1" x={PLACE_X} y={y} width={PLACE_W} height={placeH}></rect>
+        <text class="label" x={PLACE_X + 12} y={placeCy[i]} dy="0.35em">{d.places[i]}</text>
       </g>
-      <text class="label" x="42" y="88" text-anchor="middle">{d.folder}</text>
-    </g>
-    <path class="route" data-trace pathLength="1" d="M68 50H130"></path>
-    <g data-fade class="node-group">
-      <rect class="card" x="130" y="14" width="250" height="72"></rect>
-      <circle class="seal" cx="158" cy="50" r="12"></circle>
-      <path class="seal" d="M152 50l4 4 8-9"></path>
-      <text class="label strong" x="182" y="46">{d.file}</text>
-      <text class="mono" x="182" y="66">{d.fingerprint}</text>
-    </g>
-  </g>
+    ))
+  }
+  {stubs.map((p, i) => <path class="route trace s1" style={`--i:${i + 3}`} pathLength="1" d={p}></path>)}
 
-  <g data-part="places">
-    {fan.map((p) => <path class="route" data-trace pathLength="1" d={p}></path>)}
-    {
-      placeYs.map((y, i) => (
-        <g data-fade class="node-group">
-          <rect class="node" x="170" y={y} width="200" height="28"></rect>
-          <text class="label" x="186" y={placeCenters[i]} dy="0.35em">{d.places[i]}</text>
-        </g>
-      ))
-    }
-  </g>
+  <!-- Step 2: subscribe -->
+  {toPeople.map((p, i) => <path class="route trace s2" style={`--i:${i}`} pathLength="1" d={p}></path>)}
+  {
+    personYs.map((y, i) => (
+      <g class="el s2" style={`--i:${i + 1}`}>
+        <rect class="card" x={PERSON_X} y={y} width={PERSON_W} height={PERSON_H}></rect>
+        <rect class="ring r2" x={PERSON_X} y={y} width={PERSON_W} height={PERSON_H}></rect>
+        <text class="label strong" x={PERSON_X + PERSON_W / 2} y={y + 20} text-anchor="middle" dy="0.35em">{d.people[i]}</text>
+        <rect class="tag" x={PERSON_X + 26} y={y + 30} width="78" height="18"></rect>
+        <text class="mono" x={PERSON_X + PERSON_W / 2} y={y + 39} text-anchor="middle" dy="0.35em">{d.readOnly}</text>
+      </g>
+    ))
+  }
 
-  <g data-part="subscribe">
-    {routes.map((p) => <path class="route" data-trace data-route pathLength="1" d={p}></path>)}
-    {
-      columns.map((c, i) => (
-        <g data-fade class="node-group">
-          <rect class="node" x={c - 62} y={PEOPLE_Y} width="124" height="68"></rect>
-          <text class="label strong" x={c} y={PEOPLE_Y + 24} text-anchor="middle" dy="0.35em">{d.people[i]}</text>
-          <g transform={`translate(${c - 52} ${PEOPLE_Y + 40}) scale(0.36)`}>
-            <path class="glyph" d={FOLDER}></path>
-          </g>
-          <rect class="tag" x={c - 30} y={PEOPLE_Y + 38} width="82" height="20"></rect>
-          <text class="mono" x={c + 11} y={PEOPLE_Y + 48} text-anchor="middle" dy="0.35em">{d.readOnly}</text>
-        </g>
-      ))
-    }
+  <!-- Step 3: what never comes in -->
+  <g class="el s3" style="--i:0">
+    <line class="filter" x1={FILTER_X} y1="8" x2={FILTER_X} y2="332"></line>
+    <line class="filter ring r3" x1={FILTER_X} y1="8" x2={FILTER_X} y2="332"></line>
   </g>
-
-  <g data-part="filter">
-    <line class="boundary" data-fade="flat" x1="0" y1={BOUNDARY_Y} x2="400" y2={BOUNDARY_Y}></line>
-    {
-      columns.map((c, i) => (
-        <g class="chip" data-chip data-drop={CHIP_DROP}>
-          <rect x={c - 62} y={CHIP_REST_Y} width="124" height="26"></rect>
-          <text x={c} y={CHIP_REST_Y + 13} text-anchor="middle" dy="0.35em">{d.blocked[i]}</text>
-        </g>
-      ))
-    }
-    {
-      columns.map((c) => (
-        <path class="mark" data-fade="flat" d={`M${c - 4} ${BOUNDARY_Y - 4}l8 8m-8 0 8-8`}></path>
-      ))
-    }
-  </g>
-
-  <g class="dots">
-    {columns.map(() => <circle class="dot" data-dot r="2" cx="0" cy="0"></circle>)}
-  </g>
+  {
+    chipYs.map((y, i) => (
+      <g class="el s3 chip" style={`--i:${i + 1}`}>
+        <rect x={FILTER_X - 10 - CHIP_W} y={y} width={CHIP_W} height={CHIP_H}></rect>
+        <text x={FILTER_X - 10 - CHIP_W / 2} y={y + CHIP_H / 2} text-anchor="middle" dy="0.35em">{d.blocked[i]}</text>
+      </g>
+    ))
+  }
+  {
+    chipYs.map((y, i) => (
+      <g class="el s3 stop" style={`--i:${i + 1}`}>
+        <circle cx={FILTER_X} cy={y + CHIP_H / 2} r="8"></circle>
+        <path d={`M${FILTER_X - 3} ${y + CHIP_H / 2 - 3}l6 6m-6 0 6-6`}></path>
+      </g>
+    ))
+  }
 </svg>
 
 <style>
-  /* Scene tokens. Durations are read by the scene with cssMs, the opacity and rise with parseFloat. */
-  :global(:root) {
-    /* A travelling dot crosses a route. */
-    --sharing-travel-dur: 1400ms;
-    /* Pause between two crossings of the same route. */
-    --sharing-loop-pause: 700ms;
-    /* Delay between siblings (nodes, lines, packets) when a part appears. */
-    --sharing-stagger: 90ms;
-    /* Parts rise this far while they fade in. */
-    --sharing-rise: 8px;
-    /* Blocked packets rest at the boundary at this opacity (struck, not erased). */
-    --sharing-blocked-opacity: 0.7;
-  }
-
   .sharing {
-    --sharing-stroke: var(--web-hairline);
+    /* Parts rise this far while they appear. */
+    --sharing-rise: 6px;
+    /* Blocked chips slide this far before they stop at the filter. */
+    --sharing-drop: 36px;
+    /* Blocked chips rest at this opacity (struck, not erased). */
+    --sharing-blocked-opacity: 0.7;
     font-family: var(--font-mono);
   }
-  .sharing :is(path, rect, line, circle) {
+  .sharing :is(rect, circle, .node, .seal, .filter, .stop path) {
     vector-effect: non-scaling-stroke;
-    stroke-width: var(--sharing-stroke);
+    stroke-width: var(--web-hairline);
   }
+  /* Lines drawn with a dash offset must scale with the drawing. */
   .route {
     stroke: var(--border-strong);
+    stroke-width: var(--web-hairline);
     stroke-linejoin: round;
+    stroke-dasharray: 1 1;
+    stroke-dashoffset: 0;
   }
-  .node,
-  .glyph {
+  .node {
     fill: var(--surface-window);
     stroke: var(--border-strong);
   }
-  .glyph {
-    stroke-linejoin: round;
+  rect.node {
+    rx: var(--radius-control);
   }
   .card {
-    fill: var(--surface-content);
+    fill: var(--surface-window);
     stroke: var(--border-strong);
     rx: var(--radius-panel);
   }
-  rect.node {
+  .ring {
+    fill: none;
+    stroke: var(--accent);
+    rx: var(--radius-panel);
+    opacity: 0;
+  }
+  .ring.r1 {
     rx: var(--radius-control);
   }
   .tag {
@@ -145,19 +155,15 @@ const FOLDER = "M0 6a4 4 0 0 1 4-4h12l5 6h19a4 4 0 0 1 4 4v22a4 4 0 0 1-4 4H4a4 
     stroke-linecap: round;
     stroke-linejoin: round;
   }
-  circle.seal {
-    fill: var(--surface-content);
+  .seal.fill {
+    fill: var(--surface-window);
   }
-  .boundary {
-    stroke: var(--border-strong);
+  .filter {
+    stroke: var(--decor-line-strong);
     stroke-dasharray: 4 4;
   }
-  .mark {
-    stroke: var(--text-tertiary);
-    stroke-linecap: round;
-  }
-  .chip {
-    opacity: var(--sharing-blocked-opacity);
+  .filter.ring {
+    stroke: var(--accent);
   }
   .chip rect {
     fill: var(--surface-window);
@@ -166,26 +172,133 @@ const FOLDER = "M0 6a4 4 0 0 1 4-4h12l5 6h19a4 4 0 0 1 4 4v22a4 4 0 0 1-4 4H4a4 
   }
   .chip text {
     fill: var(--text-secondary);
+    font-size: 14px;
   }
-  .dot {
-    fill: var(--accent);
-    stroke: none;
-    opacity: 0;
+  .chip {
+    opacity: var(--sharing-blocked-opacity);
   }
-
+  .stop circle {
+    fill: var(--surface-content);
+    stroke: var(--border-strong);
+  }
+  .stop path {
+    stroke: var(--text-secondary);
+    stroke-linecap: round;
+  }
   text {
     font-family: var(--font-mono);
-    font-size: 13px;
+    font-size: 14px;
     fill: var(--text-secondary);
   }
   .strong {
     fill: var(--text-primary);
   }
   .mono {
-    font-size: var(--font-size-sm);
+    font-size: 12px;
     fill: var(--text-tertiary);
   }
-  .chip text {
-    font-size: 13px;
+
+  /* ---- Step states (only once the script has enhanced the section) ---- */
+  /* Future parts: dimmed, lowered a little, lines not traced. Leaving is the short transition. */
+  :global(.spotlight[data-spotlight-mode="tabs"]) .el {
+    opacity: var(--spotlight-dim-opacity);
+    transform: translateY(var(--sharing-rise));
+  }
+  :global(.spotlight[data-spotlight-mode="tabs"]) .trace {
+    stroke-dashoffset: 1;
+  }
+  /* Reached parts: full. */
+  :global(.spotlight[data-spotlight-mode="tabs"]:is([data-step="0"], [data-step="1"], [data-step="2"], [data-step="3"])) .el.s0,
+  :global(.spotlight[data-spotlight-mode="tabs"]:is([data-step="1"], [data-step="2"], [data-step="3"])) .el.s1,
+  :global(.spotlight[data-spotlight-mode="tabs"]:is([data-step="2"], [data-step="3"])) .el.s2,
+  :global(.spotlight[data-spotlight-mode="tabs"][data-step="3"]) .el.s3 {
+    opacity: 1;
+    transform: none;
+  }
+  :global(.spotlight[data-spotlight-mode="tabs"][data-step="3"]) .chip {
+    opacity: var(--sharing-blocked-opacity);
+  }
+  :global(.spotlight[data-spotlight-mode="tabs"]:is([data-step="0"], [data-step="1"], [data-step="2"], [data-step="3"])) .trace.s0,
+  :global(.spotlight[data-spotlight-mode="tabs"]:is([data-step="1"], [data-step="2"], [data-step="3"])) .trace.s1,
+  :global(.spotlight[data-spotlight-mode="tabs"]:is([data-step="2"], [data-step="3"])) .trace.s2 {
+    stroke-dashoffset: 0;
+  }
+  /* The current step's part carries the accent. */
+  :global(.spotlight[data-spotlight-mode="tabs"][data-step="0"]) .r0,
+  :global(.spotlight[data-spotlight-mode="tabs"][data-step="1"]) .r1,
+  :global(.spotlight[data-spotlight-mode="tabs"][data-step="2"]) .r2,
+  :global(.spotlight[data-spotlight-mode="tabs"][data-step="3"]) .r3 {
+    opacity: 1;
+  }
+  /* Step 3 shows the stop marks as part of the one-shot below. */
+  :global(.spotlight[data-spotlight-mode="tabs"]:not([data-step="3"])) .stop {
+    opacity: 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    /* Exit: short. */
+    :global(.spotlight[data-spotlight-mode="tabs"]) .el {
+      transition:
+        opacity var(--web-duration-fade) var(--ease-standard),
+        transform var(--web-duration-fade) var(--ease-standard);
+    }
+    :global(.spotlight[data-spotlight-mode="tabs"]) .trace {
+      transition: stroke-dashoffset var(--web-duration-fade) var(--ease-standard);
+    }
+    :global(.spotlight[data-spotlight-mode="tabs"]) .ring {
+      transition: opacity var(--web-duration-fade) var(--ease-standard);
+    }
+    /* Enter: soft and staggered. */
+    :global(.spotlight[data-spotlight-mode="tabs"]:is([data-step="0"], [data-step="1"], [data-step="2"], [data-step="3"])) .el.s0,
+    :global(.spotlight[data-spotlight-mode="tabs"]:is([data-step="1"], [data-step="2"], [data-step="3"])) .el.s1,
+    :global(.spotlight[data-spotlight-mode="tabs"]:is([data-step="2"], [data-step="3"])) .el.s2,
+    :global(.spotlight[data-spotlight-mode="tabs"][data-step="3"]) .el.s3 {
+      transition:
+        opacity var(--web-duration-reveal) var(--ease-out),
+        transform var(--web-duration-reveal) var(--ease-out);
+      transition-delay: calc(var(--i) * var(--spotlight-stagger) + var(--spotlight-entry-delay, 0ms));
+    }
+    :global(.spotlight[data-spotlight-mode="tabs"]:is([data-step="0"], [data-step="1"], [data-step="2"], [data-step="3"])) .trace.s0,
+    :global(.spotlight[data-spotlight-mode="tabs"]:is([data-step="1"], [data-step="2"], [data-step="3"])) .trace.s1,
+    :global(.spotlight[data-spotlight-mode="tabs"]:is([data-step="2"], [data-step="3"])) .trace.s2 {
+      transition: stroke-dashoffset var(--web-duration-trace) var(--ease-out);
+      transition-delay: calc(var(--i) * var(--spotlight-stagger) + var(--spotlight-entry-delay, 0ms));
+    }
+    :global(.spotlight[data-spotlight-mode="tabs"]) .ring {
+      transition-delay: var(--spotlight-entry-delay, 0ms);
+    }
+    /* One shot on each entry to step 3: the chips slide to the filter, stop and dim. */
+    :global(.spotlight[data-spotlight-mode="tabs"][data-step="3"]) .chip {
+      animation: sharing-block var(--web-duration-reveal) var(--ease-out) both;
+      animation-delay: calc(var(--i) * var(--spotlight-stagger) + var(--spotlight-entry-delay, 0ms));
+    }
+    :global(.spotlight[data-spotlight-mode="tabs"][data-step="3"]) .stop {
+      animation: sharing-stop var(--web-duration-reveal) var(--ease-out) both;
+      animation-delay: calc(var(--i) * var(--spotlight-stagger) + var(--spotlight-entry-delay, 0ms));
+    }
+  }
+
+  @keyframes sharing-block {
+    from {
+      opacity: var(--spotlight-dim-opacity);
+      transform: translateX(calc(var(--sharing-drop) * -1));
+    }
+    60% {
+      opacity: 1;
+      transform: none;
+    }
+    to {
+      opacity: var(--sharing-blocked-opacity);
+      transform: none;
+    }
+  }
+  @keyframes sharing-stop {
+    from,
+    55% {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 </style>

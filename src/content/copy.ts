@@ -226,19 +226,19 @@ export const sharingSpotlight = {
   steps: [
     {
       title: "Publish.",
-      text: "Right-click a folder and choose Share. Portolano writes one .portolano-share file, signed with your identity: a name and a short fingerprint you can compare on the phone.",
+      text: "Right-click a folder and choose Share. You get one .portolano-share file, signed with your name and a short fingerprint.",
     },
     {
       title: "Put it where the team looks.",
-      text: "A network drive, a OneDrive or Nextcloud folder, or the folder an internal web server publishes. When you change the folder, publish again.",
+      text: "A network drive, OneDrive, Nextcloud or an internal web server. Change the folder, then publish again.",
     },
     {
       title: "Subscribe.",
-      text: "Colleagues choose Add Remote Folder. It appears read-only in their tree and is checked at startup, every 15 minutes and with Sync now.",
+      text: "Colleagues add it as a remote folder. It is read-only and checked at startup, every 15 minutes and with Sync now.",
     },
     {
       title: "What never comes in.",
-      text: "No credentials, no disabled certificate or NLA checks, no local shells or programs. Everyone connects with their own credentials.",
+      text: "No credentials, no disabled certificate or NLA checks, no local programs. Everyone connects with their own credentials.",
     },
   ] as SpotlightStep[],
   diagram: {
@@ -263,19 +263,19 @@ export const vaultSpotlight = {
   steps: [
     {
       title: "Stretch the password.",
-      text: "Argon2id (64 MiB of memory, 3 passes) turns your master password into a key that exists only in memory.",
+      text: "Argon2id (64 MiB, 3 passes) turns your master password into a key that exists only in memory.",
     },
     {
       title: "Wrap the data key.",
-      text: "A random 256-bit data key encrypts the vault. The password-derived key wraps it, so changing the master password creates a new one.",
+      text: "That key wraps a random 256-bit data key, which encrypts the vault. A new master password gets a new one.",
     },
     {
       title: "Seal the credentials.",
-      text: "XChaCha20-Poly1305 is an authenticated cipher: a vault file changed by a single bit is rejected, not decrypted.",
+      text: "XChaCha20-Poly1305 seals them. A vault file changed by a single bit is rejected, not decrypted.",
     },
     {
       title: "Lock and reopen.",
-      text: "The vault locks after 15 minutes of inactivity by default (5, 30, 60 or never) and keys are zeroed. Touch ID or Windows Hello reopens it after the first unlock.",
+      text: "After 15 idle minutes (or 5, 30, 60, never) the vault locks and keys are zeroed. Touch ID or Windows Hello reopens it.",
     },
   ] as SpotlightStep[],
   diagram: {

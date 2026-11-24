@@ -1,20 +1,233 @@
 /* ==========================================================================
-   Spotlight scenes (shared folders, vault). Tokens and the shared layout hooks.
-   Pre-animation (hidden / dimmed) states exist only once the spotlight script is running
-   (html.spotlight-ready) and never on a section that failed (.spotlight-off), so without JS, with
-   reduced motion or after an error the diagram is complete and every step reads as active.
-   Scenes animate only transform, opacity and stroke-dashoffset, read durations with `cssMs`.
+   Spotlight scenes (shared folders, vault): one compact section each, at most one screen tall.
+   The step markup is a plain ordered list. Everything that hides or dims something sits under
+   [data-spotlight-mode="tabs"], which the script sets only once it has built the tablist, so without
+   JS or with reduced motion all four steps are listed and the diagram is complete.
+   Animated properties (in the diagrams): opacity, transform, stroke-dashoffset.
    ========================================================================== */
 
 :root {
-  /* One scene step: how long a diagram part takes to move into place. */
-  --spotlight-step-dur: 700ms;
-  /* Below 1024px the steps play on their own, one every this long. */
-  --spotlight-autoplay-step: 1400ms;
-  /* Wide layout: gap between the nav and the top of the pinned stage area, and height of one step. */
-  --spotlight-sticky-offset: var(--web-nav-h);
-  --spotlight-step-min: 75svh;
-  /* Narrow layout: tallest the diagram gets. */
-  --spotlight-stage-max-h: 70svh;
+  /* Entry: the diagram builds up in one flowing pass as it comes into view; each step's parts start
+     this long after the previous step's. */
+  --spotlight-entry-step: 380ms;
+  /* Diagram parts that are not the current step's are drawn at this opacity. */
+  --spotlight-dim-opacity: 0.35;
+  /* Delay between the parts of one step. */
+  --spotlight-stagger: 60ms;
+  /* Tallest the diagram gets. */
+  --spotlight-stage-max-h: 45svh;
   --spotlight-marker-w: 2px;
+  --spotlight-tab-min: 44px;
+}
+@media (min-width: 1024px) {
+  :root {
+    --spotlight-stage-max-h: 72svh;
+  }
+}
+
+.spotlight {
+  padding-block: var(--web-section-y);
+  background: var(--surface-content);
+}
+.spotlight.tone-window {
+  background: var(--surface-window);
+}
+.spotlight-inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--web-space-10);
+}
+.spotlight-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-inline-size: var(--web-measure);
+}
+.spotlight-stage {
+  margin: 0;
+  min-inline-size: 0;
+}
+.spotlight-stage svg {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  max-block-size: var(--spotlight-stage-max-h);
+  margin-inline: auto;
+}
+.spotlight-steps {
+  min-inline-size: 0;
+}
+
+/* ---- Plain list (no JS, reduced motion) --------------------------------- */
+.spotlight .steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: spotlight-step;
+}
+.spotlight .step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-inline-size: var(--web-measure);
+  counter-increment: spotlight-step;
+}
+.spotlight .step::before {
+  content: counter(spotlight-step, decimal-leading-zero);
+  font-family: var(--font-mono);
+  font-size: var(--web-eyebrow-size);
+  letter-spacing: var(--web-eyebrow-tracking);
+  color: var(--text-tertiary);
+}
+.spotlight .text {
+  color: var(--text-secondary);
+  line-height: var(--line-height-relaxed);
+}
+.spotlight .step[hidden] {
+  display: none;
+}
+
+/* ---- Tabs ----------------------------------------------------------------- */
+.spotlight[data-spotlight-mode="tabs"] .step::before {
+  content: none;
+}
+.spotlight[data-spotlight-mode="tabs"] .steps {
+  gap: 0;
+}
+.spotlight[data-spotlight-mode="tabs"] .tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-block-end: var(--web-hairline) solid var(--border-hairline);
+}
+.spotlight .tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  min-block-size: var(--spotlight-tab-min);
+  margin: 0;
+  padding: var(--space-3) var(--space-2);
+  border: 0;
+  background: none;
+  color: var(--text-tertiary);
+  font: inherit;
+  font-weight: var(--font-weight-medium);
+  text-align: start;
+  cursor: pointer;
+  transition: color var(--web-duration-fade) var(--ease-standard);
+}
+.spotlight .tab:hover,
+.spotlight .tab[aria-selected="true"] {
+  color: var(--text-primary);
+}
+.spotlight .tab .num {
+  font-family: var(--font-mono);
+  font-size: var(--web-eyebrow-size);
+  letter-spacing: var(--web-eyebrow-tracking);
+}
+/* Number-only tabs below 1024px: the title stays in the accessible name. */
+.spotlight .tab .name {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Entry build-up: `data-step` goes straight to the last step and each step's parts wait their turn.
+   Diagrams add --spotlight-entry-delay to their entering transitions and one-shot animations. */
+.spotlight[data-entry] .spotlight-stage .s1 {
+  --spotlight-entry-delay: var(--spotlight-entry-step);
+}
+.spotlight[data-entry] .spotlight-stage .s2 {
+  --spotlight-entry-delay: calc(var(--spotlight-entry-step) * 2);
+}
+.spotlight[data-entry] .spotlight-stage .s3 {
+  --spotlight-entry-delay: calc(var(--spotlight-entry-step) * 3);
+}
+
+/* Marker of the active tab. */
+.spotlight .tab .bar {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  block-size: var(--spotlight-marker-w);
+  background: var(--accent);
+  transform-origin: left;
+  transform: scaleX(0);
+}
+.spotlight .tab[aria-selected="true"] .bar {
+  transform: none;
+}
+/* Below 1024px the panel under the tab row shows the step's title and text. */
+.spotlight[data-spotlight-mode="tabs"] .step {
+  padding-block-start: var(--space-4);
+}
+
+/* ---- Wide: two columns, vertical tabs ------------------------------------ */
+@media (min-width: 1024px) {
+  .spotlight {
+    padding-block: min(var(--web-section-y), 12svh);
+  }
+  .spotlight-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    grid-template-rows: auto 1fr;
+    column-gap: var(--web-space-16);
+    row-gap: var(--space-8);
+  }
+  .spotlight-head {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .spotlight-stage {
+    grid-column: 2;
+    grid-row: 1 / -1;
+    align-self: center;
+  }
+  .spotlight-steps {
+    grid-column: 1;
+    grid-row: 2;
+    align-self: start;
+  }
+  .spotlight[data-spotlight-mode="tabs"] .tabs {
+    display: flex;
+    flex-direction: column;
+    border-block-end: 0;
+  }
+  .spotlight .tab {
+    justify-content: flex-start;
+    padding-inline: var(--space-6) var(--space-2);
+  }
+  .spotlight .tab .name {
+    position: static;
+    inline-size: auto;
+    block-size: auto;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+    font-size: var(--font-size-lg);
+  }
+  .spotlight .tab .bar {
+    inset: 0 auto 0 0;
+    inline-size: var(--spotlight-marker-w);
+    block-size: auto;
+    transform-origin: top;
+    transform: scaleY(0);
+  }
+  .spotlight .tab[aria-selected="true"] .bar {
+    transform: none;
+  }
+  /* The tab already carries the title; the panel under the list shows the text. */
+  .spotlight[data-spotlight-mode="tabs"] .step .t-h3 {
+    display: none;
+  }
+  .spotlight[data-spotlight-mode="tabs"] .step {
+    padding-inline-start: var(--space-6);
+  }
 }
