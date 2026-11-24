@@ -57,18 +57,21 @@ export function wrapIndex(index: number, delta: number, length: number): number 
   return (((index + delta) % length) + length) % length;
 }
 
-/** Tab to select for a key press in a horizontal tablist, or null when the key is not handled. */
-export function tabForKey(key: string, current: number, length: number): number | null {
-  switch (key) {
-    case "ArrowRight":
-      return wrapIndex(current, 1, length);
-    case "ArrowLeft":
-      return wrapIndex(current, -1, length);
-    case "Home":
-      return 0;
-    case "End":
-      return Math.max(length - 1, 0);
-    default:
-      return null;
-  }
+/** Which arrow keys move between the tabs: left/right, up/down or all four. */
+export type TabAxis = "horizontal" | "vertical" | "both";
+
+/** Tab to select for a key press in a tablist, or null when the key is not handled. */
+export function tabForKey(key: string, current: number, length: number, axis: TabAxis = "horizontal"): number | null {
+  const across = axis !== "vertical";
+  const down = axis !== "horizontal";
+  if (key === "Home") return 0;
+  if (key === "End") return Math.max(length - 1, 0);
+  if ((across && key === "ArrowRight") || (down && key === "ArrowDown")) return wrapIndex(current, 1, length);
+  if ((across && key === "ArrowLeft") || (down && key === "ArrowUp")) return wrapIndex(current, -1, length);
+  return null;
+}
+
+/** How long autoplay stays on tab `index` before moving on; the last tab may hold longer. */
+export function autoDelay(index: number, length: number, interval: number, lastInterval: number = interval): number {
+  return index === length - 1 ? lastInterval : interval;
 }

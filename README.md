@@ -3,13 +3,15 @@
 The website of [Portolano](https://github.com/reallovedone/portolano), published at
 [portolano.cloud](https://portolano.cloud).
 
-A single static page built with [Astro](https://astro.build), TypeScript and hand-written CSS.
+A single static page built with [Astro](https://astro.build), TypeScript and hand-written CSS:
+hero, features, shared folders, the vault, a screenshot showcase, security, download and FAQ.
 No UI framework, no animation library, no web fonts, no cookies, no analytics and no requests
-to third parties from the visitor's browser.
+to third parties from the visitor's browser. Motion is CSS plus a little TypeScript, respects
+reduced motion, and the page is complete without JavaScript.
 
 ## Development
 
-Requires Node.js 22.23.4 or later and pnpm.
+Requires Node.js 22.23.4 or later (CI uses 24) and pnpm.
 
 ```sh
 pnpm install
@@ -34,6 +36,10 @@ pnpm test       # unit tests
   window at fixed URLs. The files are generated from `src/assets/screens/` by
   `node scripts/whats-new.mjs <version> <name>...`, committed, and never changed once
   published.
+
+## Checks
+
+CI runs `pnpm check`, `pnpm test` and `pnpm build` on every pull request.
 
 ## Deployment
 

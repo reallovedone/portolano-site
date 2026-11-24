@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { formatCount as buildTimeFormatCount } from "../../lib/github";
-import { activeIndex, countAt, easeOutCubic, formatCount, staggerDelay, tabForKey, travelled, wrapIndex } from "./pure";
+import { activeIndex, autoDelay, countAt, easeOutCubic, formatCount, staggerDelay, tabForKey, travelled, wrapIndex } from "./pure";
 
 describe("easeOutCubic", () => {
   it("runs from 0 to 1, decelerating, and clamps", () => {
@@ -98,5 +98,28 @@ describe("wrapIndex and tabForKey", () => {
     expect(tabForKey("End", 0, 4)).toBe(3);
     expect(tabForKey("Enter", 0, 4)).toBeNull();
     expect(tabForKey("ArrowDown", 0, 4)).toBeNull();
+  });
+});
+
+describe("tabForKey axes", () => {
+  it("handles up/down only for vertical and both axes", () => {
+    expect(tabForKey("ArrowDown", 3, 4, "vertical")).toBe(0);
+    expect(tabForKey("ArrowUp", 0, 4, "vertical")).toBe(3);
+    expect(tabForKey("ArrowRight", 0, 4, "vertical")).toBeNull();
+    expect(tabForKey("ArrowDown", 1, 4, "both")).toBe(2);
+    expect(tabForKey("ArrowLeft", 1, 4, "both")).toBe(0);
+    expect(tabForKey("Home", 2, 4, "vertical")).toBe(0);
+    expect(tabForKey("End", 0, 4, "vertical")).toBe(3);
+  });
+});
+
+describe("autoDelay", () => {
+  it("uses the interval, and the longer hold on the last tab only", () => {
+    expect(autoDelay(0, 4, 3500, 6000)).toBe(3500);
+    expect(autoDelay(2, 4, 3500, 6000)).toBe(3500);
+    expect(autoDelay(3, 4, 3500, 6000)).toBe(6000);
+  });
+  it("defaults to a constant interval", () => {
+    expect(autoDelay(3, 4, 3500)).toBe(3500);
   });
 });

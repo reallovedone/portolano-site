@@ -1,8 +1,8 @@
 // Showcase tabs (plan 3.5). The markup is the static column of screenshots plus a tablist that is
 // only shown with JavaScript; this script wires the ARIA tabs pattern (roving tabindex, arrow keys,
-// Home/End), the sliding indicator and the auto-advance.
+// Home/End, in autotabs.ts), the sliding indicator and the auto-advance.
+import { startAutotabs } from "../../scripts/motion/autotabs";
 import { cssMs } from "../../scripts/motion/css";
-import { tabForKey, wrapIndex } from "../../scripts/motion/pure";
 
 export function initShowcase(reducedMotion: boolean): void {
   const root = document.querySelector<HTMLElement>("[data-showcase]");
@@ -46,59 +46,15 @@ export function initShowcase(reducedMotion: boolean): void {
     placeIndicator();
   };
 
-  // Auto-advance --------------------------------------------------------------------------
-  const interval = cssMs("--showcase-advance");
-  let stopped = reducedMotion;
-  let onScreen = false;
-  let timer: number | undefined;
-
-  const clearTimer = (): void => {
-    if (timer !== undefined) window.clearTimeout(timer);
-    timer = undefined;
-  };
-  const schedule = (): void => {
-    clearTimer();
-    if (stopped || !onScreen || document.hidden) return;
-    timer = window.setTimeout(() => {
-      select(wrapIndex(current, 1, tabs.length));
-      schedule();
-    }, interval);
-  };
-  // Any click, key or focus inside the tablist ends the automatic tour for good.
-  const stop = (): void => {
-    stopped = true;
-    clearTimer();
-  };
-
-  tabs.forEach((tab, i) => {
-    tab.addEventListener("click", () => {
-      select(i);
-    });
+  startAutotabs({
+    list,
+    tabs,
+    select,
+    interval: cssMs("--showcase-advance"),
+    watch: root,
+    initial: current,
+    reducedMotion,
   });
-  list.addEventListener("click", stop);
-  list.addEventListener("focusin", stop);
-  list.addEventListener("keydown", (event) => {
-    stop();
-    const from = tabs.findIndex((tab) => tab === document.activeElement);
-    if (from < 0) return;
-    const next = tabForKey(event.key, from, tabs.length);
-    if (next === null) return;
-    event.preventDefault();
-    tabs[next].focus();
-    select(next);
-  });
-
-  const visibility = new IntersectionObserver((entries) => {
-    onScreen = entries[entries.length - 1].isIntersecting;
-    schedule();
-  });
-  visibility.observe(root);
-  document.addEventListener("visibilitychange", schedule);
-  window
-    .matchMedia("(prefers-reduced-motion: reduce)")
-    .addEventListener("change", (event) => {
-      if (event.matches) stop();
-    });
 
   // The indicator is placed without a transition the first time, and again when sizes change.
   select(current);

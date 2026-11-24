@@ -1,169 +1,121 @@
-// Spotlight scenes entry point. Reduced motion: nothing runs, the diagrams stay complete. Otherwise
-// `spotlight-ready` goes on <html> (hidden/dimmed states live in spotlight.css under it) and each
-// [data-spotlight] section loads its scene and `motion` lazily when it nears the viewport. From 1024px
-// the scene follows the scroll through the steps column; below, it plays the steps once on its own.
-// When a section fails, `spotlight-off` on it switches its pre-animation states off.
-import { whenStylesReady, cssMs } from "../motion/css";
-import { stepAt } from "./pure";
-import type { MotionApi, Scene, SceneFactory } from "./types";
+// Spotlight scenes. Each [data-spotlight] section ships a plain ordered list of steps; here it becomes
+// a tablist (vertical from 1024px, a row of number-only tabs below), and the section gets `data-step`
+// (0..n-1) on every change, which is all the diagrams' CSS reacts to. When the diagram comes into
+// view it builds up in one flowing pass and stays complete; the tabs are then there to read
+// the steps one at a time. Reduced motion: nothing runs, the list and the complete diagram stay.
+import { startAutotabs } from "../motion/autotabs";
+import { whenStylesReady } from "../motion/css";
 
-const SCENES: Record<string, () => Promise<{ default: SceneFactory }>> = {
-  sharing: () => import("./sharing"),
-  vault: () => import("./vault"),
-};
+const WIDE = window.matchMedia("(min-width: 1024px)");
+// `data-step` before the diagram has built up (or after it left the screen): nothing reached yet.
+const WAITING = "-1";
+// Share of the diagram that must be on screen before it builds up.
+const VISIBLE_RATIO = 0.4;
 
-const WIDE = "(min-width: 1024px)";
-
-function fail(root: HTMLElement, name: string, error: unknown): void {
-  root.classList.add("spotlight-off");
-  root.querySelectorAll<HTMLElement>("[data-step]").forEach((step) => step.removeAttribute("data-active"));
-  console.error(`Spotlight disabled: ${name}`, error);
+function el<K extends keyof HTMLElementTagNameMap>(tag: K, className: string): HTMLElementTagNameMap[K] {
+  const node = document.createElement(tag);
+  node.className = className;
+  return node;
 }
 
-function setActive(steps: HTMLElement[], upTo: number, onlyThis: boolean): void {
-  steps.forEach((step, i) => {
-    const on = onlyThis ? i === upTo : i <= upTo;
-    if (on) step.setAttribute("data-active", "");
-    else step.removeAttribute("data-active");
+function enhance(root: HTMLElement): void {
+  const ol = root.querySelector<HTMLElement>(".steps");
+  const panels = Array.from(root.querySelectorAll<HTMLElement>(".step"));
+  const labelledBy = root.getAttribute("aria-labelledby");
+  if (!ol || panels.length === 0 || !labelledBy) return;
+
+  const name = root.id;
+  const list = el("div", "tabs");
+  list.setAttribute("role", "tablist");
+  list.setAttribute("aria-labelledby", labelledBy);
+  ol.setAttribute("role", "presentation");
+
+  const tabs = panels.map((panel, i) => {
+    const tab = el("button", "tab");
+    tab.type = "button";
+    tab.id = `${name}-tab-${i}`;
+    tab.setAttribute("role", "tab");
+    tab.setAttribute("aria-controls", `${name}-panel-${i}`);
+    const num = el("span", "num");
+    num.textContent = String(i + 1).padStart(2, "0");
+    const label = el("span", "name");
+    label.textContent = panel.querySelector("h3")?.textContent ?? "";
+    const bar = el("span", "bar");
+    bar.setAttribute("aria-hidden", "true");
+    tab.append(num, label, bar);
+    list.append(tab);
+    panel.id = `${name}-panel-${i}`;
+    panel.setAttribute("role", "tabpanel");
+    panel.setAttribute("aria-labelledby", tab.id);
+    return tab;
   });
-}
+  ol.before(list);
 
-/** Runs `scene` for one section in whichever layout is current, restarting when the breakpoint changes. */
-function drive(root: HTMLElement, steps: HTMLElement[], scene: Scene, motion: MotionApi, name: string): void {
-  const list = root.querySelector<HTMLElement>(".steps");
-  const figure = root.querySelector<HTMLElement>(".stage");
-  if (!list || !figure) throw new Error("Spotlight markup is incomplete");
-  const target: HTMLElement = list;
-  const watched: HTMLElement = figure;
+  const orient = (): void => list.setAttribute("aria-orientation", WIDE.matches ? "vertical" : "horizontal");
+  orient();
+  WIDE.addEventListener("change", orient);
 
-  const query = window.matchMedia(WIDE);
-  let stopMode: () => void = () => {};
-  let broken = false;
+  const select = (index: number): void => {
+    tabs.forEach((tab, i) => {
+      const active = i === index;
+      tab.setAttribute("aria-selected", String(active));
+      tab.tabIndex = active ? 0 : -1;
+      panels[i].hidden = !active;
+      if (active) panels[i].setAttribute("tabindex", "0");
+      else panels[i].removeAttribute("tabindex");
+    });
+    root.dataset.step = String(index);
+  };
 
-  const safeGo = (index: number): void => {
-    if (broken) return;
-    try {
-      scene.go(index);
-    } catch (error) {
-      broken = true;
-      stopMode();
-      try {
-        scene.destroy();
-      } catch {
-        // The scene is already broken; the section is switched off below.
+  const stage = root.querySelector(".spotlight-stage") ?? root;
+  let touched = false;
+  let parked = true;
+  // Waiting state: everything dimmed until the diagram is well in view.
+  const park = (): void => {
+    parked = true;
+    delete root.dataset.entry;
+    root.dataset.step = WAITING;
+  };
+  // Entry: straight to the last step; with `data-entry` the CSS starts each step's parts a beat
+  // after the previous step's, so the diagram builds up in one flowing pass. The attribute stays
+  // until the reader picks a step (or the scene leaves), so running one-shots are never retimed.
+  const build = (): void => {
+    parked = false;
+    root.dataset.entry = "";
+    select(panels.length - 1);
+  };
+  select(0);
+  park();
+  root.dataset.spotlightMode = "tabs";
+
+  startAutotabs({ list, tabs, select, axis: "both" });
+
+  // The reader's choice wins: after a click, key or focus in the tabs, the scene is left alone.
+  // Capture phase: the entry delays are gone before the tab's own handler changes the step.
+  const settle = (): void => {
+    touched = true;
+    delete root.dataset.entry;
+  };
+  for (const type of ["click", "keydown", "focusin"]) list.addEventListener(type, settle, true);
+
+  // It builds up again each time it comes back after leaving the screen completely.
+  new IntersectionObserver(
+    (entries) => {
+      if (touched) return;
+      const entry = entries[entries.length - 1];
+      if (!entry.isIntersecting) {
+        if (!parked) park();
+      } else if (parked && entry.intersectionRatio >= VISIBLE_RATIO) {
+        build();
       }
-      fail(root, name, error);
-    }
-  };
-
-  // Calls `onChange(visible)` whenever the stage crosses into or out of view.
-  const watchStage = (onChange: (visible: boolean) => void): (() => void) => {
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) onChange(entry.isIntersecting);
-      },
-      { threshold: 0.35 },
-    );
-    io.observe(watched);
-    return () => io.disconnect();
-  };
-
-  function startWide(): () => void {
-    let progress = 0;
-    let visible = false;
-    let current = -1;
-    const update = (): void => {
-      if (!visible) return;
-      const index = stepAt(progress, steps.length);
-      if (index === current) return;
-      current = index;
-      setActive(steps, index, true);
-      safeGo(index);
-    };
-    const stopWatch = watchStage((v) => {
-      visible = v;
-      update();
-    });
-    const stopScroll = motion.scroll(
-      (p: number) => {
-        progress = p;
-        update();
-      },
-      { target, offset: ["start center", "end center"] },
-    );
-    return () => {
-      stopWatch();
-      stopScroll();
-    };
-  }
-
-  function startNarrow(): () => void {
-    const gap = cssMs("--spotlight-autoplay-step");
-    const timers: number[] = [];
-    let started = false;
-    const stopWatch = watchStage((visible) => {
-      if (!visible || started) return;
-      started = true;
-      stopWatch();
-      steps.forEach((_, i) => {
-        timers.push(
-          window.setTimeout(() => {
-            setActive(steps, i, false);
-            safeGo(i);
-          }, i * gap),
-        );
-      });
-    });
-    return () => {
-      stopWatch();
-      timers.forEach((id) => window.clearTimeout(id));
-    };
-  }
-
-  const start = (): void => {
-    stopMode();
-    steps.forEach((step) => step.removeAttribute("data-active"));
-    stopMode = query.matches ? startWide() : startNarrow();
-  };
-
-  query.addEventListener("change", start);
-  start();
-}
-
-function load(root: HTMLElement): void {
-  const name = root.dataset.spotlight ?? "";
-  const scenes = SCENES[name];
-  const stage = root.querySelector<SVGSVGElement>(".stage svg");
-  const steps = Array.from(root.querySelectorAll<HTMLElement>("[data-step]"));
-  if (!scenes || !stage || steps.length === 0) {
-    fail(root, name, new Error("Unknown scene or missing markup"));
-    return;
-  }
-  Promise.all([scenes(), import("./motion-api")])
-    .then(([module, motion]) => {
-      const scene = module.default({ root, stage, motion, stepCount: steps.length });
-      drive(root, steps, scene, motion, name);
-    })
-    .catch((error: unknown) => fail(root, name, error));
+    },
+    { threshold: [0, VISIBLE_RATIO] },
+  ).observe(stage);
 }
 
 function run(): void {
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  const sections = Array.from(document.querySelectorAll<HTMLElement>("[data-spotlight]"));
-  if (sections.length === 0) return;
-
-  document.documentElement.classList.add("spotlight-ready");
-  const io = new IntersectionObserver(
-    (entries) => {
-      for (const entry of entries) {
-        if (!entry.isIntersecting) continue;
-        io.unobserve(entry.target);
-        load(entry.target as HTMLElement);
-      }
-    },
-    { rootMargin: "50% 0px" },
-  );
-  sections.forEach((section) => io.observe(section));
+  document.querySelectorAll<HTMLElement>("[data-spotlight]").forEach(enhance);
 }
 
 whenStylesReady(run);

@@ -16,28 +16,43 @@ const { id, tone = "content", eyebrow, title, lead, steps, titleId, diagramLabel
 ---
 
 <!--
-  Scene contract: the slot holds one inline <svg aria-hidden="true"> in its final state. The loader
-  (src/scripts/spotlight/index.ts) finds it as `.stage svg`, the steps as `[data-step]`, and sets
-  `data-active` on the current step(s). `spotlight-off` on the section means the scene failed.
+  Spotlight: a compact scene (at most one screen) with four steps next to an inline diagram.
+
+  Markup: the steps are a plain <ol> (title + text each), so without JavaScript, or with reduced
+  motion, everything reads as a list and the diagram is complete. src/scripts/spotlight/index.ts then
+  turns the list into vertical tabs (narrow: a row of number-only tabs) and sets on the <section>:
+    data-spotlight-mode="tabs"   present once enhanced (all hidden/dimmed states live under it)
+    data-step="-1"               waiting: the diagram is not yet in view (or left it); nothing reached,
+                                 every part dimmed. Once in view it goes straight to 3, complete.
+    data-step="0".."3"           the current step; set on every change (entry, click, keys)
+    data-entry                   present from that entry until a tab is used or the scene leaves:
+                                 each step's parts start --spotlight-entry-step after the previous
+                                 step's (diagrams add --spotlight-entry-delay to their entering
+                                 transitions and one-shots), so the build-up reads as one pass.
+  DIAGRAM CONTRACT: `data-step` on the section is the ONLY thing diagrams may depend on. Diagram CSS
+  uses selectors like `[data-spotlight-mode="tabs"][data-step="2"] .x`; with no mode attribute the
+  diagram must show its final, complete state. The slot holds one <svg aria-hidden="true">.
 -->
-<section id={id} data-spotlight={id} class:list={["section", `tone-${tone}`]} aria-labelledby={titleId}>
-  <div class="container inner">
-    <header class="head">
+<section
+  id={id}
+  data-spotlight={id}
+  class:list={["spotlight", `tone-${tone}`]}
+  aria-labelledby={titleId}
+>
+  <div class="container spotlight-inner">
+    <header class="spotlight-head">
       {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
       <h2 id={titleId} class="t-h2">{title}</h2>
       {lead && <p class="t-lead">{lead}</p>}
     </header>
-    <div class="body">
-      <div class="stage-col">
-        <figure class="stage" role="img" aria-label={diagramLabel}>
-          <slot />
-        </figure>
-      </div>
+    <figure class="spotlight-stage" role="img" aria-label={diagramLabel}>
+      <slot />
+    </figure>
+    <div class="spotlight-steps">
       <ol class="steps">
         {
-          steps.map((step, i) => (
-            <li class="step" data-step={i}>
-              <span class="num">{String(i + 1).padStart(2, "0")}</span>
+          steps.map((step) => (
+            <li class="step">
               <h3 class="t-h3">{step.title}</h3>
               <p class="text">{step.text}</p>
             </li>
@@ -47,127 +62,3 @@ const { id, tone = "content", eyebrow, title, lead, steps, titleId, diagramLabel
     </div>
   </div>
 </section>
-
-<style>
-  .section {
-    position: relative;
-    padding-block: var(--web-section-y);
-    background: var(--surface-content);
-  }
-  .tone-window {
-    background: var(--surface-window);
-  }
-  .inner {
-    display: flex;
-    flex-direction: column;
-    gap: var(--web-space-14);
-  }
-  .head {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-    max-inline-size: var(--web-measure);
-  }
-
-  .body {
-    display: flex;
-    flex-direction: column;
-    gap: var(--web-space-10);
-  }
-  .stage {
-    margin: 0;
-  }
-  .stage :global(svg) {
-    display: block;
-    inline-size: 100%;
-    block-size: auto;
-    max-block-size: var(--spotlight-stage-max-h);
-  }
-
-  .steps {
-    display: flex;
-    flex-direction: column;
-    gap: var(--web-space-10);
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-  .step {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-    max-inline-size: var(--web-measure);
-  }
-  .num {
-    font-family: var(--font-mono);
-    font-size: var(--web-eyebrow-size);
-    letter-spacing: var(--web-eyebrow-tracking);
-    color: var(--text-tertiary);
-  }
-  .text {
-    color: var(--text-secondary);
-    line-height: var(--line-height-relaxed);
-  }
-
-  @media (min-width: 1024px) {
-    .body {
-      display: grid;
-      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-      gap: var(--web-space-16);
-      align-items: start;
-    }
-    /* Source order is stage first (narrow layout); the wide layout puts the steps on the left. */
-    .steps {
-      grid-column: 1;
-      grid-row: 1;
-      gap: 0;
-    }
-    .stage-col {
-      grid-column: 2;
-      grid-row: 1;
-      position: sticky;
-      top: var(--spotlight-sticky-offset);
-      display: flex;
-      align-items: center;
-      block-size: calc(100svh - var(--spotlight-sticky-offset));
-    }
-    .stage {
-      inline-size: 100%;
-    }
-    .step {
-      justify-content: center;
-      min-block-size: var(--spotlight-step-min);
-      padding-inline-start: var(--space-6);
-    }
-    .step::before {
-      content: "";
-      position: absolute;
-      inset-block: 25% 25%;
-      inset-inline-start: 0;
-      inline-size: var(--spotlight-marker-w);
-      background: var(--accent);
-      opacity: 0;
-    }
-  }
-
-  /* Active step highlighting exists only while the motion script runs and the section has not failed. */
-  @media (min-width: 1024px) {
-    :global(html.spotlight-ready) .section:not(:global(.spotlight-off)) .step :is(.t-h3, .num, .text) {
-      color: var(--text-tertiary);
-      transition: color var(--web-duration-fade) var(--ease-standard);
-    }
-    :global(html.spotlight-ready) .section:not(:global(.spotlight-off)) .step[data-active] .t-h3 {
-      color: var(--text-primary);
-    }
-    :global(html.spotlight-ready) .section:not(:global(.spotlight-off)) .step[data-active] .text {
-      color: var(--text-secondary);
-    }
-    :global(html.spotlight-ready) .section:not(:global(.spotlight-off)) .step[data-active]::before {
-      opacity: 1;
-    }
-    :global(html.spotlight-ready) .section:not(:global(.spotlight-off)) .step::before {
-      transition: opacity var(--web-duration-fade) var(--ease-standard);
-    }
-  }
-</style>
