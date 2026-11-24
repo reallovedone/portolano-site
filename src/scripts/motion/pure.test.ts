@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatCount as buildTimeFormatCount } from "../../lib/github";
-import { activeIndex, autoDelay, countAt, easeOutCubic, formatCount, staggerDelay, tabForKey, travelled, wrapIndex } from "./pure";
+import { activeIndex, autoDelay, countAt, easeOutCubic, staggerDelay, tabForKey, travelled, wrapIndex } from "./pure";
 
 describe("easeOutCubic", () => {
   it("runs from 0 to 1, decelerating, and clamps", () => {
@@ -32,23 +31,6 @@ describe("countAt", () => {
   it("handles a zero duration and a zero target", () => {
     expect(countAt(7, 0, 0)).toBe(7);
     expect(countAt(0, 300, 900)).toBe(0);
-  });
-});
-
-describe("formatCount", () => {
-  it("matches the build-time formatter", () => {
-    for (const n of [0, 3, 11, 999, 1000, 1234, 1999, 12_000, 999_999, 1_000_000]) {
-      expect(formatCount(n)).toBe(buildTimeFormatCount(n));
-    }
-  });
-  it("formats integers up to 999 and then k", () => {
-    expect(formatCount(999)).toBe("999");
-    expect(formatCount(1200)).toBe("1.2k");
-    expect(formatCount(2000)).toBe("2k");
-  });
-  it("rejects invalid input", () => {
-    expect(() => formatCount(-1)).toThrow(RangeError);
-    expect(() => formatCount(Number.NaN)).toThrow(RangeError);
   });
 });
 

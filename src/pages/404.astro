@@ -11,7 +11,7 @@ const data = await getGithubData();
 const { notFound } = service;
 ---
 
-<Base title={`${notFound.title} — Portolano`} canonical={false} noindex>
+<Base title={`${notFound.title}${notFound.titleSuffix}`} canonical={false} noindex>
   <Nav stars={data.stars} home="/" />
   <main id="main" class="lost">
     <Compass placement="center" />

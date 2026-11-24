@@ -106,6 +106,9 @@ const FOLDER = "M0 6a4 4 0 0 1 4-4h12l5 6h19a4 4 0 0 1 4 4v22a4 4 0 0 1-4 4H4a4 
   .sharing {
     /* Parts rise this far while they appear. */
     --sharing-rise: 6px;
+    /* Label sizes, in SVG user units. */
+    --sharing-text: 14px;
+    --sharing-text-small: 12px;
     /* Blocked chips slide this far before they stop at the filter. */
     --sharing-drop: 36px;
     /* Blocked chips rest at this opacity (struck, not erased). */
@@ -172,7 +175,7 @@ const FOLDER = "M0 6a4 4 0 0 1 4-4h12l5 6h19a4 4 0 0 1 4 4v22a4 4 0 0 1-4 4H4a4 
   }
   .chip text {
     fill: var(--text-secondary);
-    font-size: 14px;
+    font-size: var(--sharing-text);
   }
   .chip {
     opacity: var(--sharing-blocked-opacity);
@@ -187,14 +190,14 @@ const FOLDER = "M0 6a4 4 0 0 1 4-4h12l5 6h19a4 4 0 0 1 4 4v22a4 4 0 0 1-4 4H4a4 
   }
   text {
     font-family: var(--font-mono);
-    font-size: 14px;
+    font-size: var(--sharing-text);
     fill: var(--text-secondary);
   }
   .strong {
     fill: var(--text-primary);
   }
   .mono {
-    font-size: 12px;
+    font-size: var(--sharing-text-small);
     fill: var(--text-tertiary);
   }
 

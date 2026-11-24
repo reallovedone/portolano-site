@@ -44,10 +44,33 @@
   --hero-route-travel: 500ms;
   --hero-route-lit: 900ms;
   --hero-route-max-active: 2;
-  --hero-dot-size: 3px;
 
   /* ---- Layout and scroll hand-off ---------------------------------------- */
   --hero-rose-y: 50svh;
   --hero-window-gap: var(--web-space-16);
   --hero-morph-fade: 0.15;
+}
+
+/* Shared by the rose (Compass) and the hero mark: a stroke drawn along its path, and a pop-in. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes trace {
+    from {
+      stroke-dasharray: 1 2;
+      stroke-dashoffset: 1;
+    }
+    to {
+      stroke-dasharray: 1 2;
+      stroke-dashoffset: 0;
+    }
+  }
+  @keyframes pop {
+    from {
+      opacity: 0;
+      transform: scale(0.4);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
 }

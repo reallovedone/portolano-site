@@ -1,7 +1,8 @@
 ---
 import Button from "../Button.astro";
 import { githubBand, REPO_URL } from "../../content/copy";
-import { formatCount, visibleStat, type GithubData } from "../../lib/github";
+import { visibleStat, type GithubData } from "../../lib/github";
+import { formatCount } from "../../lib/format";
 
 interface Props {
   data: GithubData;

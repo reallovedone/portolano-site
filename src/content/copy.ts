@@ -4,7 +4,6 @@
 export const REPO_URL = "https://github.com/reallovedone/portolano";
 export const SECURITY_URL = `${REPO_URL}/blob/main/SECURITY.md`;
 export const ISSUES_URL = `${REPO_URL}/issues`;
-export const LICENSE_NAME = "MIT";
 
 /** A run of text, optionally emphasised. */
 export type TextPart = string | { em: string };
@@ -19,6 +18,7 @@ export const service = {
   skipLink: "Skip to content",
   notFound: {
     title: "Off the chart.",
+    titleSuffix: " — Portolano",
     text: "This page does not exist.",
     link: "Back to the home port →",
   },

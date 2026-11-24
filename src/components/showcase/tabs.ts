@@ -2,7 +2,7 @@
 // only shown with JavaScript; this script wires the ARIA tabs pattern (roving tabindex, arrow keys,
 // Home/End, in autotabs.ts), the sliding indicator and the auto-advance.
 import { startAutotabs } from "../../scripts/motion/autotabs";
-import { cssMs } from "../../scripts/motion/css";
+import { cssMs } from "../../scripts/css";
 
 export function initShowcase(reducedMotion: boolean): void {
   const root = document.querySelector<HTMLElement>("[data-showcase]");

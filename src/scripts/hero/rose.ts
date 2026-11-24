@@ -1,5 +1,5 @@
 // Continuous state of the rose: slow rotation with upright labels, routes, pointer highlight.
-import { cssMs, cssNumber, cssValue } from "./css";
+import { cssMs, cssNumber, cssValue } from "../css";
 
 const POINTS = 16;
 const RADIUS = 420;

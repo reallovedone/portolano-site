@@ -5,7 +5,7 @@
 // - children of [data-reveal-children] (set by Section.astro and the GitHub band),
 // - the children of the download section's .inner,
 // - the children of [data-reveal-items], one by one, staggered.
-import { cssMs } from "./css";
+import { cssMs } from "../css";
 import { staggerDelay } from "./pure";
 
 const SINGLES = "[data-reveal-children] > :not([data-reveal-items]), #download > .inner > *";
