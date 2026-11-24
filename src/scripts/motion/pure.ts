@@ -12,22 +12,6 @@ export function countAt(target: number, elapsed: number, duration: number): numb
   return Math.floor(target * easeOutCubic(elapsed / duration));
 }
 
-/**
- * Integers up to 999, then one decimal with a "k" suffix (1.2k). Same output as `formatCount` in
- * src/lib/github.ts (which also holds build-time fetching code, so it is not imported into the
- * browser bundle); a test keeps the two in step.
- */
-export function formatCount(value: number): string {
-  if (!Number.isFinite(value) || value < 0) {
-    throw new RangeError(`formatCount expects a non-negative finite number, got ${value}`);
-  }
-  const whole = Math.floor(value);
-  if (whole <= 999) return String(whole);
-  const thousands = Math.floor(whole / 100) / 10;
-  if (thousands >= 1000) return `${Math.floor(thousands / 1000)}M`;
-  return `${thousands.toFixed(1).replace(/\.0$/, "")}k`;
-}
-
 /** Delay of the `index`-th item of a staggered group. */
 export function staggerDelay(index: number, stepMs: number): number {
   return Math.max(0, index) * stepMs;

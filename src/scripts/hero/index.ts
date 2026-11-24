@@ -3,8 +3,8 @@
 // hidden, the hero is off screen or reduced motion is requested.
 import { createMorph } from "./morph";
 import { createRose } from "./rose";
-import { cssMs } from "./css";
-import { whenStylesReady } from "../motion/css";
+import { cssMs } from "../css";
+import { whenStylesReady } from "../css";
 
 function start(): void {
   const hero = document.querySelector<HTMLElement>("[data-hero]");

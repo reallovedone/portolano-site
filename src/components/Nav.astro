@@ -4,7 +4,8 @@ import Icon from "./Icon.astro";
 import Logo from "./Logo.astro";
 import ThemeToggle from "./ThemeToggle.astro";
 import { nav, REPO_URL, service } from "../content/copy";
-import { formatCount, visibleStat } from "../lib/github";
+import { visibleStat } from "../lib/github";
+import { formatCount } from "../lib/format";
 
 interface Props {
   stars: number | null;

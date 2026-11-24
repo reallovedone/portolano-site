@@ -43,7 +43,6 @@
 
   /* ---- Layout ----------------------------------------------------------- */
   --web-container: 1120px;
-  --web-container-narrow: 720px;
   --web-gutter: 24px;
   --web-section-y: clamp(88px, 12vw, 160px);
   --web-nav-h: 56px;
@@ -54,7 +53,6 @@
   --web-space-10: 40px;
   --web-space-14: 56px;
   --web-space-16: 64px;
-  --web-space-20: 80px;
 
   /* ---- Buttons ---------------------------------------------------------- */
   --web-button-h-lg: 44px;
@@ -77,7 +75,6 @@
   --web-duration-fade: 200ms;
 
   /* ---- Decoration ------------------------------------------------------- */
-  --web-bearing-size: 17px;
   --web-hero-compass-size: max(100%, 100vmin);
 }
 
@@ -94,7 +91,6 @@
     --web-duration-trace: 1ms;
     --web-duration-intro: 1ms;
     --web-duration-fade: 1ms;
-    --web-card-route-trace: 1ms;
   }
 }
 
@@ -225,10 +221,6 @@ a:hover {
 .t-small {
   font-size: var(--web-small-size);
   line-height: var(--web-small-leading);
-}
-
-.t-mono {
-  font-family: var(--font-mono);
 }
 
 /* ---- Component metrics used by the page components ------------------------ */

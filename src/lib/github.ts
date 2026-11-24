@@ -21,6 +21,8 @@ const REPO_WEB = `https://github.com/${REPO}`;
 export const RELEASES_URL = `${REPO_WEB}/releases`;
 export const LATEST_RELEASE_URL = `${REPO_WEB}/releases/latest`;
 const FETCH_TIMEOUT_MS = 15_000;
+const FETCH_ATTEMPTS = 2;
+const RETRY_DELAY_MS = 1_000;
 
 /** Subset of the GitHub release payload that we use. */
 export interface ReleaseAsset {
@@ -34,18 +36,6 @@ export interface Release {
   prerelease: boolean;
   published_at?: string | null;
   assets: ReleaseAsset[];
-}
-
-/** Integers up to 999, then one decimal with a "k" suffix (1.2k). */
-export function formatCount(value: number): string {
-  if (!Number.isFinite(value) || value < 0) {
-    throw new RangeError(`formatCount expects a non-negative finite number, got ${value}`);
-  }
-  const whole = Math.floor(value);
-  if (whole <= 999) return String(whole);
-  const thousands = Math.floor(whole / 100) / 10;
-  if (thousands >= 1000) return `${Math.floor(thousands / 1000)}M`;
-  return `${thousands.toFixed(1).replace(/\.0$/, "")}k`;
 }
 
 /** Returns the value only when it should be displayed; null hides the column. */
@@ -142,7 +132,7 @@ export function buildGithubData(repo: unknown, releases: unknown): GithubData {
   return data;
 }
 
-async function fetchJson(fetchFn: typeof fetch, url: string, token?: string): Promise<unknown> {
+async function fetchJsonOnce(fetchFn: typeof fetch, url: string, token?: string): Promise<unknown> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
@@ -159,23 +149,44 @@ async function fetchJson(fetchFn: typeof fetch, url: string, token?: string): Pr
   }
 }
 
+/** One retry after a short pause, so a passing API error does not empty a scheduled build. */
+async function fetchJson(
+  fetchFn: typeof fetch,
+  url: string,
+  token: string | undefined,
+  retryDelayMs: number,
+): Promise<unknown> {
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      return await fetchJsonOnce(fetchFn, url, token);
+    } catch (error) {
+      if (attempt >= FETCH_ATTEMPTS) throw error;
+      await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
+    }
+  }
+}
+
 /**
- * Fetches the live data. Never throws: on any failure it warns once and returns the fallback.
- * `apiBase` and `fetchFn` are injectable for tests.
+ * Fetches the live data. On any failure it warns once and returns the fallback, unless the data is
+ * required (GITHUB_DATA_REQUIRED=1, set for the scheduled deploy): then it throws, so the build
+ * fails and the last good site stays online. `apiBase`, `fetchFn` and the options are injectable
+ * for tests.
  */
 export async function loadGithubData(
   fetchFn: typeof fetch = fetch,
   apiBase: string = process.env.GITHUB_API_URL || "https://api.github.com",
   token: string | undefined = process.env.GITHUB_TOKEN,
+  { required = process.env.GITHUB_DATA_REQUIRED === "1", retryDelayMs = RETRY_DELAY_MS } = {},
 ): Promise<GithubData> {
   try {
     const [repo, releases] = await Promise.all([
-      fetchJson(fetchFn, `${apiBase}/repos/${REPO}`, token),
-      fetchJson(fetchFn, `${apiBase}/repos/${REPO}/releases?per_page=100`, token),
+      fetchJson(fetchFn, `${apiBase}/repos/${REPO}`, token, retryDelayMs),
+      fetchJson(fetchFn, `${apiBase}/repos/${REPO}/releases?per_page=100`, token, retryDelayMs),
     ]);
     return buildGithubData(repo, releases);
   } catch (error) {
     const reason = error instanceof Error ? error.message : String(error);
+    if (required) throw new Error(`[github] Repository data is required but could not be loaded: ${reason}`);
     console.warn(`[github] Could not load repository data, building without it: ${reason}`);
     return fallbackGithubData();
   }

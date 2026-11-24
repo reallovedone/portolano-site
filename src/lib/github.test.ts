@@ -3,7 +3,6 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   buildGithubData,
   fallbackGithubData,
-  formatCount,
   getGithubData,
   loadGithubData,
   pickLatest,
@@ -44,25 +43,6 @@ const releases: Release[] = [
   release("v0.3.0", "2026-11-10T10:00:00Z", [1000, 1000, 1000], { draft: true }),
   release("v0.4.0-beta.1", "2026-11-12T10:00:00Z", [500, 500, 500], { prerelease: true }),
 ];
-
-describe("formatCount", () => {
-  it("keeps integers up to 999", () => {
-    expect(formatCount(0)).toBe("0");
-    expect(formatCount(11)).toBe("11");
-    expect(formatCount(999)).toBe("999");
-  });
-
-  it("abbreviates from 1000", () => {
-    expect(formatCount(1000)).toBe("1k");
-    expect(formatCount(1234)).toBe("1.2k");
-    expect(formatCount(15999)).toBe("15.9k");
-  });
-
-  it("rejects invalid input", () => {
-    expect(() => formatCount(-1)).toThrow(RangeError);
-    expect(() => formatCount(Number.NaN)).toThrow(RangeError);
-  });
-});
 
 describe("visibleStat", () => {
   it("hides null", () => {
@@ -112,6 +92,8 @@ describe("pickLatest and buildGithubData", () => {
 });
 
 describe("loadGithubData", () => {
+  const NO_WAIT = { retryDelayMs: 0 };
+
   afterEach(() => vi.restoreAllMocks());
 
   function json(body: unknown, status = 200): Response {
@@ -136,7 +118,7 @@ describe("loadGithubData", () => {
     const fetchFn = vi.fn(async () => {
       throw new TypeError("fetch failed");
     });
-    const data = await loadGithubData(fetchFn as unknown as typeof fetch, "https://api.test");
+    const data = await loadGithubData(fetchFn as unknown as typeof fetch, "https://api.test", undefined, NO_WAIT);
     expect(data).toEqual(fallbackGithubData());
     expect(data.stars).toBeNull();
     expect(data.downloads).toBeNull();
@@ -148,9 +130,30 @@ describe("loadGithubData", () => {
   it("falls back on a non-200 answer", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     const fetchFn = vi.fn(async () => json({ message: "rate limited" }, 403));
-    const data = await loadGithubData(fetchFn as unknown as typeof fetch, "https://api.test");
+    const data = await loadGithubData(fetchFn as unknown as typeof fetch, "https://api.test", undefined, NO_WAIT);
     expect(data).toEqual(fallbackGithubData());
     expect(warn).toHaveBeenCalledTimes(1);
+  });
+
+  it("retries once after a passing error", async () => {
+    let calls = 0;
+    const fetchFn = vi.fn(async (url: string | URL | Request) => {
+      calls += 1;
+      if (calls === 1) return json({ message: "unavailable" }, 502);
+      return String(url).includes("/releases") ? json(releases) : json({ stargazers_count: 7 });
+    });
+    const data = await loadGithubData(fetchFn as unknown as typeof fetch, "https://api.test", undefined, NO_WAIT);
+    expect(data.stars).toBe(7);
+    expect(fetchFn).toHaveBeenCalledTimes(3);
+  });
+
+  it("throws instead of falling back when the data is required", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const fetchFn = vi.fn(async () => json({ message: "rate limited" }, 403));
+    await expect(
+      loadGithubData(fetchFn as unknown as typeof fetch, "https://api.test", undefined, { ...NO_WAIT, required: true }),
+    ).rejects.toThrow(/required/);
+    expect(warn).not.toHaveBeenCalled();
   });
 });
 

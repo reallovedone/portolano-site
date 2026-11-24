@@ -1,5 +1,5 @@
 ---
-// One app screenshot in both themes, through the image pipeline (AVIF/WebP with PNG fallback,
+// One app screenshot in both themes, through the image pipeline (AVIF with WebP fallback,
 // declared dimensions, lazy loading). Both versions are in the HTML; CSS shows the one matching the
 // system theme or the data-theme attribute. Browsers do not fetch lazy images that are not displayed.
 import { Picture } from "astro:assets";
@@ -27,8 +27,8 @@ const widths = [800, 1280, 1920, 2560];
     pictureAttributes={{ class: "shot-light" }}
     src={light}
     alt={alt}
-    formats={["avif", "webp"]}
-    fallbackFormat="png"
+    formats={["avif"]}
+    fallbackFormat="webp"
     widths={widths}
     sizes={sizes}
     loading="lazy"
@@ -38,8 +38,8 @@ const widths = [800, 1280, 1920, 2560];
     pictureAttributes={{ class: "shot-dark" }}
     src={dark}
     alt={alt}
-    formats={["avif", "webp"]}
-    fallbackFormat="png"
+    formats={["avif"]}
+    fallbackFormat="webp"
     widths={widths}
     sizes={sizes}
     loading="lazy"

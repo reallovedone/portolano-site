@@ -2,7 +2,7 @@
 // commands are typed character by character; then the cursor blinks (CSS, `is-idle`).
 // The final state is already in the HTML. Hidden states (`is-pending`) are CSS under html.motion-ready;
 // every line keeps its place, so nothing moves. Not started with reduced motion.
-import { cssMs } from "./css";
+import { cssMs } from "../css";
 
 type Wait = (ms: number) => Promise<void>;
 

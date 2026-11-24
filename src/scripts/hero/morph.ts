@@ -1,7 +1,7 @@
 // Scroll hand-off: the site rose shrinks and moves down until it coincides with the rose drawn in the
 // welcome screenshot, then fades out. One scroll listener, one requestAnimationFrame per scroll burst.
 // Below the desktop breakpoint, or when the alignment cannot be trusted, the rose simply fades.
-import { cssNumber } from "./css";
+import { cssNumber } from "../css";
 
 // The rose in the 1280x800 welcome screenshot (app window at 2x): centre and size as fractions of the
 // image, measured on welcome-{light,dark}.png. The app draws its rose 1000 CSS px wide.

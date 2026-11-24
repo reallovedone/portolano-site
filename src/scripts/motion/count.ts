@@ -1,7 +1,8 @@
 // Count-up of the GitHub band numbers (plan 4.4). The final value is already in the HTML; the
 // count only replays it from 0 when the number enters view. Not used with reduced motion.
-import { cssMs } from "./css";
-import { countAt, formatCount } from "./pure";
+import { cssMs } from "../css";
+import { formatCount } from "../../lib/format";
+import { countAt } from "./pure";
 
 export function initCountUp(): void {
   const duration = cssMs("--motion-count");

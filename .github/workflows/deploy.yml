@@ -40,6 +40,9 @@ jobs:
         run: pnpm build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # The scheduled rebuild exists only to refresh the numbers: if GitHub cannot give them, fail
+          # the job so the last good site stays online instead of publishing one without them.
+          GITHUB_DATA_REQUIRED: ${{ github.event_name == 'schedule' && '1' || '0' }}
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
         with:

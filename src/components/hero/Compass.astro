@@ -211,30 +211,25 @@ const bearings = BEARINGS.map(([index, port]) => {
   .dot {
     opacity: 0;
   }
-  .route[data-port="22"],
-  .dot[data-port="22"] {
-    stroke: var(--protocol-ssh);
-    fill: var(--protocol-ssh);
+  [data-port="22"] {
+    --port-color: var(--protocol-ssh);
   }
-  .route[data-port="3389"],
-  .dot[data-port="3389"] {
-    stroke: var(--protocol-rdp);
-    fill: var(--protocol-rdp);
+  [data-port="3389"] {
+    --port-color: var(--protocol-rdp);
   }
-  .route[data-port="5900"],
-  .dot[data-port="5900"] {
-    stroke: var(--protocol-vnc);
-    fill: var(--protocol-vnc);
+  [data-port="5900"] {
+    --port-color: var(--protocol-vnc);
   }
-  .route[data-port="443"],
-  .dot[data-port="443"] {
-    stroke: var(--protocol-web);
-    fill: var(--protocol-web);
+  [data-port="443"] {
+    --port-color: var(--protocol-web);
   }
-  .route[data-port="23"],
-  .dot[data-port="23"] {
-    stroke: var(--protocol-local);
-    fill: var(--protocol-local);
+  [data-port="23"] {
+    --port-color: var(--protocol-local);
+  }
+  .route,
+  .dot {
+    stroke: var(--port-color);
+    fill: var(--port-color);
   }
   .route {
     fill: none;
@@ -252,59 +247,23 @@ const bearings = BEARINGS.map(([index, port]) => {
     :global(html.hero-ready) .animated :is(.node, .bearing) {
       transition: fill var(--duration-slow) var(--ease-standard);
     }
-    :global(html.hero-ready) .animated .node {
-      transform-box: fill-box;
-      transform-origin: center;
-    }
-    :global(html.hero-ready) .animated .bearing {
+    :global(html.hero-ready) .animated :is(.node, .bearing) {
       transform-box: fill-box;
       transform-origin: center;
     }
     :global(html.hero-ready) .animated .node:global(.lit) {
       fill: var(--decor-text);
     }
-    :global(html.hero-ready) .animated .bearing:global(.lit)[data-port="22"] {
-      fill: var(--protocol-ssh);
-    }
-    :global(html.hero-ready) .animated .bearing:global(.lit)[data-port="3389"] {
-      fill: var(--protocol-rdp);
-    }
-    :global(html.hero-ready) .animated .bearing:global(.lit)[data-port="5900"] {
-      fill: var(--protocol-vnc);
-    }
-    :global(html.hero-ready) .animated .bearing:global(.lit)[data-port="443"] {
-      fill: var(--protocol-web);
-    }
-    :global(html.hero-ready) .animated .bearing:global(.lit)[data-port="23"] {
-      fill: var(--protocol-local);
+    :global(html.hero-ready) .animated .bearing:global(.lit) {
+      fill: var(--port-color);
     }
 
-    @keyframes trace {
-      from {
-        stroke-dasharray: 1 2;
-        stroke-dashoffset: 1;
-      }
-      to {
-        stroke-dasharray: 1 2;
-        stroke-dashoffset: 0;
-      }
-    }
     @keyframes appear {
       from {
         opacity: 0;
       }
       to {
         opacity: 1;
-      }
-    }
-    @keyframes pop {
-      from {
-        opacity: 0;
-        transform: scale(0.4);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1);
       }
     }
 

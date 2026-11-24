@@ -3,7 +3,7 @@
 // part fails, `motion-off` on <html> switches them all off so the page stays complete.
 import { initShowcase } from "../../components/showcase/tabs";
 import { initCountUp } from "./count";
-import { whenStylesReady } from "./css";
+import { whenStylesReady } from "../css";
 import { initReveal } from "./reveal";
 import { initRouteLine } from "./routeline";
 import { initTerminal } from "./terminal";

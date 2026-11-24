@@ -4,7 +4,7 @@
 // view it builds up in one flowing pass and stays complete; the tabs are then there to read
 // the steps one at a time. Reduced motion: nothing runs, the list and the complete diagram stay.
 import { startAutotabs } from "../motion/autotabs";
-import { whenStylesReady } from "../motion/css";
+import { whenStylesReady } from "../css";
 
 const WIDE = window.matchMedia("(min-width: 1024px)");
 // `data-step` before the diagram has built up (or after it left the screen): nothing reached yet.
